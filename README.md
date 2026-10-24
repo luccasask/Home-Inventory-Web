@@ -44,7 +44,7 @@ The build runs TypeScript checks before generating `dist/`.
 
 ## GitHub Pages
 
-The Vite base is `/Home-Inventory-Web/`. Hash routes work on page refresh and direct entry without server rewrites. The included GitHub Actions workflow validates configuration, tests, builds and deploys pushes to `main`; select **GitHub Actions** as the Pages source in repository Settings → Pages before deployment. This local deliverable has not been pushed or deployed.
+The Vite base is `/Home-Inventory-Web/`. Hash routes work on page refresh and direct entry without server rewrites. The included GitHub Actions workflow validates configuration, tests, builds and deploys pushes to `main`. GitHub Pages is configured to use **GitHub Actions**. View deployment progress in the repository's Actions tab. The site address is https://luccasask.github.io/Home-Inventory-Web/.
 
 Under Settings → Secrets and variables → Actions → Variables, add `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_INVENTORY_ID` with the same public configuration as `.env.local`. The workflow rejects missing configuration. The publishable key is public by design and is included in the frontend bundle; RLS is the access boundary.
 
