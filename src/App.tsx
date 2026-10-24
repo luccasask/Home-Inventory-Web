@@ -89,7 +89,7 @@ export default function App() {
         }} />
       </main>
       <BottomNavigation />
-      <span className="demo-label">{loading ? 'Ansluter till Supabase…' : error ? 'Supabase · Ingen anslutning' : 'Supabase · Endast läsning'}</span>
+      <span className="sr-only">{loading ? 'Ansluter till Supabase…' : error ? 'Supabase · Ingen anslutning' : 'Supabase · Endast läsning'}</span>
       <span role="status" className="sr-only">{status}</span>
     </div>
   );
