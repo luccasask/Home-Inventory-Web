@@ -1,0 +1,8 @@
+packages:
+  - '.'
+nodeLinker: hoisted
+storeDir: node_modules/.store
+packageImportMethod: copy
+enableGlobalVirtualStore: false
+onlyBuiltDependencies:
+  - esbuild
