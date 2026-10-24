@@ -6,6 +6,7 @@ import { loadInventory } from './services/inventoryRepository';
 import { InventoryCard } from './components/InventoryCard';
 import { InventoryIcon } from './components/InventoryIcon';
 import { BottomNavigation, ContextToolbar } from './components/Navigation';
+import { FitText } from './components/FitText';
 
 export default function App() {
   const [items, setItems] = useState<readonly InventoryItem[]>([]);
@@ -64,7 +65,7 @@ export default function App() {
       <main className="inventory-panel" id="main-content">
         <header className="inventory-header">
           <button className={`refresh-button ${loading ? 'is-loading' : ''}`} onClick={() => void refresh()} disabled={loading} aria-label="Uppdatera innehållet" title="Uppdatera"><RefreshCcw /></button>
-          <h1 ref={heading} tabIndex={-1}>{current ? <InventoryIcon name={current.icon} /> : <House aria-hidden="true" />}<span>{title}</span></h1>
+          <h1 ref={heading} tabIndex={-1}>{current ? <InventoryIcon name={current.icon} /> : <House aria-hidden="true" />}<FitText>{title}</FitText></h1>
           {!missing && <p className="hierarchy-summary">{loading && items.length === 0 ? 'Hämtar ditt inventarium…' : error ? 'Anslutningen kunde inte slutföras' : summary}</p>}
           <div className="header-rule" />
         </header>
