@@ -1,5 +1,6 @@
 import { ChevronLeft, Copy, FolderPen, House, LayoutGrid, PackagePlus, Rows2, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { bounce } from './motion';
 
 export type ViewMode = 'list' | 'grid';
 
@@ -9,18 +10,12 @@ export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, on
 }) {
   return (
     <nav className="context-toolbar" aria-label="Åtgärder för aktuell vy" onClickCapture={event => {
-      if (!(event.target instanceof Element) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (!(event.target instanceof Element)) return;
       const control = event.target.closest('button, a');
       if (!control || control.matches(':disabled, [aria-disabled="true"]')) return;
       const icon = control.querySelector('svg');
       if (!icon) return;
-      icon.getAnimations().forEach(animation => animation.cancel());
-      icon.animate([
-        { transform: 'scale(1)', offset: 0 },
-        { transform: 'scale(.82)', offset: .3 },
-        { transform: 'scale(1.1)', offset: .65 },
-        { transform: 'scale(1)', offset: 1 },
-      ], { duration: 260, easing: 'ease-out' });
+      bounce(icon);
     }}>
       <Link to={atHome ? '/' : parentRoute} aria-disabled={atHome} tabIndex={atHome ? -1 : 0} aria-label="Gå till överordnad förvaring" title="Gå upp en nivå" className={atHome ? 'is-disabled' : ''}><ChevronLeft /></Link>
       <button type="button" onClick={onCopy} aria-label="Kopiera sidans länk" title="Kopiera sidans länk"><Copy /></button>

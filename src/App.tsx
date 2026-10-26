@@ -91,6 +91,7 @@ export default function App() {
   return (
     <div className="app-shell">
       <main className={`inventory-panel inventory-panel--${viewMode}`} id="main-content">
+        <div key={location.pathname} className="inventory-page">
         <header className="inventory-header">
           <button className={`refresh-button ${loading ? 'is-loading' : ''}`} onClick={() => void refresh()} disabled={loading} aria-label="Uppdatera innehållet" title="Uppdatera"><RefreshCcw /></button>
           <h1 ref={heading} tabIndex={-1}>{current ? <InventoryIcon name={current.icon} /> : <House aria-hidden="true" />}<FitText>{title}</FitText></h1>
@@ -120,6 +121,7 @@ export default function App() {
             </>}
         </div>
 
+        </div>
         <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={requestedView} onViewChange={changeView} onCopy={() => void copyLink()} />
       </main>
       <BottomNavigation />
