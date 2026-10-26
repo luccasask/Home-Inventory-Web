@@ -46,10 +46,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .add-card { color: var(--terra); justify-content: center; }
 .add-card svg { width: 48px; height: 48px; stroke-width: 2; }
 .context-toolbar { border: 4px solid var(--terra); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; height: 83px; flex-shrink: 0; margin-top: 12px; background: var(--cream); }
-.context-toolbar > button, .context-toolbar > a { color: var(--navy); border: 0; background: none; padding: 7px; width: 70px; height: 68px; display: flex; align-items: center; justify-content: center; }
+.context-toolbar > button, .context-toolbar > a { color: var(--navy); border: 0; background: none; padding: 7px; width: 20%; max-width: 70px; height: 68px; display: flex; align-items: center; justify-content: center; }
 .context-toolbar svg { width: 46px; height: 46px; stroke-width: 2.1; }
-.parent-icon { border: 4px solid var(--navy); border-bottom-color: transparent; border-radius: 7px; width: 40px; height: 41px; display: flex; align-items: center; justify-content: center; }
-.parent-icon svg { width: 34px; height: 36px; margin-top: 8px; }
+.context-toolbar > [aria-pressed="true"] svg { fill: var(--navy); stroke: var(--navy); }
 .is-disabled { pointer-events: none; }
 .bottom-navigation { height: 80px; padding: 8px 33px; display: flex; align-items: center; justify-content: space-around; flex-shrink: 0; color: var(--cream); }
 .bottom-navigation > a, .bottom-navigation > button { display: flex; align-items: center; justify-content: center; width: 70px; height: 64px; color: inherit; background: none; border: 0; padding: 6px; }
@@ -85,4 +84,28 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
   .inventory-card { min-height: 103px; padding-inline: 24px; gap: 22px; }
   .context-toolbar { max-width: 520px; width: 100%; align-self: center; margin-top: 18px; }
   .bottom-navigation { max-width: 460px; width: 100%; align-self: center; }
+}
+
+.inventory-panel--grid .header-rule { display: none; }
+.inventory-content--grid { border: 4px solid var(--terra); border-radius: 25px; padding: 20px 10px; }
+.inventory-list--grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 8px; align-content: start; }
+.inventory-list--grid .inventory-card,
+.inventory-list--grid .add-card { border: 0; border-radius: 12px; min-height: 80px; padding: 4px 0; gap: 8px; flex-direction: column; justify-content: flex-start; }
+.inventory-list--grid .card-copy { order: -1; flex: none; width: 100%; text-align: center; }
+.inventory-list--grid .card-title { font-size: 14px; font-weight: 700; letter-spacing: 0; }
+.inventory-list--grid .card-icon,
+.inventory-list--grid .add-card svg { width: 48px; height: 50px; stroke-width: 1.9; }
+.inventory-list--grid .card-subtitle,
+.inventory-list--grid .card-chevron { display: none; }
+.inventory-list--grid .add-card { font-size: 14px; font-weight: 700; line-height: 1.18; }
+@media (max-width: 374px) {
+  .inventory-content--grid { padding-inline: 6px; }
+  .inventory-list--grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .context-toolbar svg { width: 38px; height: 40px; }
+}
+@media (min-width: 700px) {
+  .inventory-content--grid { padding: 24px 18px; }
+  .inventory-list--grid { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 22px 12px; }
+  .inventory-list--grid .card-title, .inventory-list--grid .add-card { font-size: 16px; }
+  .inventory-list--grid .card-icon, .inventory-list--grid .add-card svg { width: 56px; height: 58px; }
 }

@@ -1,13 +1,19 @@
-import { ArrowUpFromLine, ChevronLeft, FolderPen, House, PackagePlus, Search, Trash2 } from 'lucide-react';
+import { ChevronLeft, Copy, FolderPen, House, LayoutGrid, PackagePlus, Rows2, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export function ContextToolbar({ onBack, parentRoute, atHome }: { onBack: () => void; parentRoute: string; atHome: boolean }) {
+export type ViewMode = 'list' | 'grid';
+
+export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, onCopy }: {
+  parentRoute: string; atHome: boolean; viewMode: ViewMode;
+  onViewChange: (mode: ViewMode) => void; onCopy: () => void;
+}) {
   return (
     <nav className="context-toolbar" aria-label="Åtgärder för aktuell vy">
-      <button type="button" onClick={onBack} disabled={atHome} aria-label="Tillbaka" title="Tillbaka"><ChevronLeft /></button>
-      <Link to={parentRoute} aria-disabled={atHome} tabIndex={atHome ? -1 : 0} aria-label="Gå till överordnad förvaring" title="Gå upp en nivå" className={atHome ? 'is-disabled' : ''}><span className="parent-icon"><ArrowUpFromLine /></span></Link>
+      <Link to={atHome ? '/' : parentRoute} aria-disabled={atHome} tabIndex={atHome ? -1 : 0} aria-label="Gå till överordnad förvaring" title="Gå upp en nivå" className={atHome ? 'is-disabled' : ''}><ChevronLeft /></Link>
+      <button type="button" onClick={onCopy} aria-label="Kopiera sidans länk" title="Kopiera sidans länk"><Copy /></button>
       <button type="button" disabled aria-label="Redigera — ingår inte i denna förhandsvisning" title="Redigering ingår inte i denna förhandsvisning"><FolderPen /></button>
-      <button type="button" disabled aria-label="Ta bort — ingår inte i denna förhandsvisning" title="Borttagning ingår inte i denna förhandsvisning"><Trash2 /></button>
+      <button type="button" onClick={() => onViewChange('grid')} aria-pressed={viewMode === 'grid'} aria-label="Visa som grid" title="Visa som grid"><LayoutGrid /></button>
+      <button type="button" onClick={() => onViewChange('list')} aria-pressed={viewMode === 'list'} aria-label="Visa som lista" title="Visa som lista"><Rows2 /></button>
     </nav>
   );
 }

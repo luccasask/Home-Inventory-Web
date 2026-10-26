@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { House, Plus, RefreshCcw } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { House, PackagePlus, Plus, RefreshCcw } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { ancestorsOf, childrenOf, routeFor, type InventoryItem } from './domain/inventory';
 import { loadInventory } from './services/inventoryRepository';
 import { InventoryCard } from './components/InventoryCard';
 import { InventoryIcon } from './components/InventoryIcon';
-import { BottomNavigation, ContextToolbar } from './components/Navigation';
+import { BottomNavigation, ContextToolbar, type ViewMode } from './components/Navigation';
 import { FitText } from './components/FitText';
 
 export default function App() {
@@ -13,7 +13,20 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    try { return localStorage.getItem('inventory-view') === 'grid' ? 'grid' : 'list'; }
+    catch { return 'list'; }
+  });
+  const changeView = (mode: ViewMode) => {
+    setViewMode(mode);
+    try { localStorage.setItem('inventory-view', mode); } catch { /* The view still works without storage. */ }
+  };
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setStatus('Sidans länk har kopierats.');
+    } catch { setStatus('Länken kunde inte kopieras. Kopiera adressen från adressfältet.'); }
+  };
   const location = useLocation();
   const heading = useRef<HTMLHeadingElement>(null);
   const list = useRef<HTMLDivElement>(null);
@@ -62,7 +75,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <main className="inventory-panel" id="main-content">
+      <main className={`inventory-panel inventory-panel--${viewMode}`} id="main-content">
         <header className="inventory-header">
           <button className={`refresh-button ${loading ? 'is-loading' : ''}`} onClick={() => void refresh()} disabled={loading} aria-label="Uppdatera innehållet" title="Uppdatera"><RefreshCcw /></button>
           <h1 ref={heading} tabIndex={-1}>{current ? <InventoryIcon name={current.icon} /> : <House aria-hidden="true" />}<FitText>{title}</FitText></h1>
@@ -70,24 +83,21 @@ export default function App() {
           <div className="header-rule" />
         </header>
 
-        <div className="inventory-content" ref={list} aria-busy={loading}>
+        <div className={`inventory-content inventory-content--${viewMode}`} ref={list} aria-busy={loading}>
           {error ? <div className="empty-state" role="alert"><p>{error}</p><button onClick={() => void refresh()}>Försök igen</button></div>
             : loading && items.length === 0 ? <p className="empty-state">Hämtar innehåll…</p>
             : missing ? <div className="empty-state"><p>Platsen saknas eller är inte tillgänglig.</p><Link to="/">Till Mitt hem</Link></div>
             : <>
-              <div className="inventory-list" aria-label={`Innehåll i ${title}`}>
+              <div className={`inventory-list inventory-list--${viewMode}`} aria-label={`Innehåll i ${title}`}>
                 {children.map(item => <InventoryCard key={item.id} item={item} items={items} />)}
-                {current?.type !== 'OBJECT' && <button className="add-card" disabled title="Lägg till ingår inte i denna version" aria-label="Lägg till — ingår inte i denna version"><Plus aria-hidden="true" /></button>}
+                {current?.type !== 'OBJECT' && <button className="add-card" disabled title="Lägg till ingår inte i denna version" aria-label="Lägg till — ingår inte i denna version">{viewMode === 'grid' ? <><span>Lägg till…</span><PackagePlus aria-hidden="true" /></> : <Plus aria-hidden="true" />}</button>}
               </div>
               {current?.description && <p className="item-description">{current.description}</p>}
               {children.length === 0 && current?.type !== 'OBJECT' && <p className="demo-empty">{isHome ? 'Ditt inventarium är tomt.' : 'Förvaringen är tom.'}</p>}
             </>}
         </div>
 
-        <ContextToolbar atHome={isHome} parentRoute={parentRoute} onBack={() => {
-          if (window.history.state?.idx > 0) navigate(-1);
-          else navigate(parentRoute);
-        }} />
+        <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={viewMode} onViewChange={changeView} onCopy={() => void copyLink()} />
       </main>
       <BottomNavigation />
       <span className="sr-only">{loading ? 'Ansluter till Supabase…' : error ? 'Supabase · Ingen anslutning' : 'Supabase · Endast läsning'}</span>
