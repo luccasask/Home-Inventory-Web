@@ -46,6 +46,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .inventory-card { --card-color: var(--teal); padding: 14px 16px 14px 20px; gap: 19px; color: var(--card-color); border-color: var(--card-color); transition: background-color 160ms ease, color 160ms ease; }
 .inventory-card--location { --card-color: var(--navy); }
 .inventory-card--object { --card-color: var(--amber); }
+.inventory-card, .inventory-card * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 .card-icon { width: 50px; height: 54px; stroke-width: 1.9; }
 .card-icon-wrap { display: contents; }
 .card-copy { display: flex; flex-direction: column; flex: 1; min-width: 0; }
