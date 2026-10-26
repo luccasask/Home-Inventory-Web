@@ -8,7 +8,7 @@ export function InventoryCard({ item, items }: { item: InventoryItem; items: rea
   const count = childrenOf(items, item.id).length;
   return (
     <Link className={`inventory-card inventory-card--${item.type.toLowerCase()}`} to={routeFor(item)}>
-      <InventoryIcon name={item.icon} className="card-icon" />
+      <span className="card-icon-wrap"><InventoryIcon name={item.icon} className="card-icon" /></span>
       <span className="card-copy">
         <FitText className="card-title">{item.name}</FitText>
         <span className="card-subtitle">{item.type === 'OBJECT' ? 'Föremål' : `${count} förvaringar`}</span>

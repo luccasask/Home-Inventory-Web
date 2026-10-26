@@ -113,7 +113,7 @@ export default function App() {
             : <>
               <div className={`inventory-list inventory-list--${viewMode}`} aria-label={`Innehåll i ${title}`}>
                 {children.map(item => <InventoryCard key={item.id} item={item} items={items} />)}
-                {current?.type !== 'OBJECT' && <button className="add-card" disabled title="Lägg till ingår inte i denna version" aria-label="Lägg till — ingår inte i denna version">{viewMode === 'grid' ? <><span>Lägg till…</span><PackagePlus aria-hidden="true" /></> : <Plus aria-hidden="true" />}</button>}
+                {current?.type !== 'OBJECT' && <button className="add-card" disabled title="Lägg till ingår inte i denna version" aria-label="Lägg till — ingår inte i denna version">{viewMode === 'grid' ? <><span>Lägg till…</span><span className="card-icon-wrap"><PackagePlus aria-hidden="true" /></span></> : <Plus aria-hidden="true" />}</button>}
               </div>
               {current?.description && <p className="item-description">{current.description}</p>}
               {children.length === 0 && current?.type !== 'OBJECT' && <p className="demo-empty">{isHome ? 'Ditt inventarium är tomt.' : 'Förvaringen är tom.'}</p>}
