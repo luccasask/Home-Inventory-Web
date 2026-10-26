@@ -17,10 +17,25 @@ export default function App() {
     try { return localStorage.getItem('inventory-view') === 'grid' ? 'grid' : 'list'; }
     catch { return 'list'; }
   });
+  const [requestedView, setRequestedView] = useState<ViewMode>(viewMode);
+  const [viewTransition, setViewTransition] = useState<'idle' | 'out' | 'hidden' | 'in'>('idle');
   const changeView = (mode: ViewMode) => {
-    setViewMode(mode);
-    try { localStorage.setItem('inventory-view', mode); } catch { /* The view still works without storage. */ }
+    setRequestedView(mode);
   };
+  useEffect(() => {
+    if (viewTransition === 'idle' && requestedView !== viewMode) setViewTransition('out');
+  }, [requestedView, viewMode, viewTransition]);
+  useEffect(() => {
+    try { localStorage.setItem('inventory-view', viewMode); } catch { /* The view still works without storage. */ }
+  }, [viewMode]);
+  useEffect(() => {
+    if (viewTransition !== 'hidden') return;
+    // Keep the new layout invisible until ResizeObserver and FitText have settled.
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => setViewTransition('in'));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [viewTransition]);
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -83,7 +98,15 @@ export default function App() {
           <div className="header-rule" />
         </header>
 
-        <div className={`inventory-content inventory-content--${viewMode}`} ref={list} aria-busy={loading}>
+        <div className={`inventory-content inventory-content--${viewMode} view-transition--${viewTransition}`} ref={list}
+          aria-busy={loading || viewTransition !== 'idle'} inert={viewTransition !== 'idle'}
+          onAnimationEnd={event => {
+            if (event.target !== event.currentTarget) return;
+            if (viewTransition === 'out') {
+              setViewMode(requestedView);
+              setViewTransition('hidden');
+            } else if (viewTransition === 'in') setViewTransition('idle');
+          }}>
           {error ? <div className="empty-state" role="alert"><p>{error}</p><button onClick={() => void refresh()}>Försök igen</button></div>
             : loading && items.length === 0 ? <p className="empty-state">Hämtar innehåll…</p>
             : missing ? <div className="empty-state"><p>Platsen saknas eller är inte tillgänglig.</p><Link to="/">Till Mitt hem</Link></div>
@@ -97,7 +120,7 @@ export default function App() {
             </>}
         </div>
 
-        <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={viewMode} onViewChange={changeView} onCopy={() => void copyLink()} />
+        <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={requestedView} onViewChange={changeView} onCopy={() => void copyLink()} />
       </main>
       <BottomNavigation />
       <span className="sr-only">{loading ? 'Ansluter till Supabase…' : error ? 'Supabase · Ingen anslutning' : 'Supabase · Endast läsning'}</span>
