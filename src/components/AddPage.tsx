@@ -2,6 +2,8 @@ import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 're
 import { Box, ChevronDown, FolderPen, MapPin, Package, PackagePlus, Save, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { InventoryItem, ItemType } from '../domain/inventory';
+import type { InventoryTag } from '../domain/tags';
+import { InventoryIcon } from './InventoryIcon';
 import { draftFor, draftIsComplete, placementChoices } from '../domain/itemForm';
 import { FitText } from './FitText';
 import { DeleteConfirmation } from './DeleteConfirmation';
@@ -19,7 +21,8 @@ function limitWords(text: string) {
   return text;
 }
 
-export function AddPage({ items, loading, error, active, onRetry, onReadyChange, onSaved, onDeleted, editing = false, item, initialParent }: {
+export function AddPage({ items, tags, loading, error, active, onRetry, onReadyChange, onSaved, onDeleted, editing = false, item, initialParent }: {
+  tags: readonly InventoryTag[];
   items: readonly InventoryItem[]; loading: boolean; error: string; active: boolean; onRetry: () => void;
   onReadyChange: (ready: boolean) => void;
   onSaved: (item: InventoryItem) => void; onDeleted: (item: InventoryItem) => void;
@@ -61,16 +64,18 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
     initializedItem.current = draftKey;
   }, [active, draftKey]);
   const places = useMemo(() => placementChoices(items, item, initialParent, type), [items, item, initialParent, type]);
+  const selectedTag = tags.find(tag => tag.id === draft.tagId);
+  const tagValid = !draft.tagId || Boolean(selectedTag);
   useLayoutEffect(() => {
-    onReadyChange(active && !loading && !busy && (!editing || Boolean(original?.revision)) && draftIsComplete(draft, places));
-  }, [active, loading, busy, editing, original, draft, places, onReadyChange]);
+    onReadyChange(active && !loading && !busy && tagValid && (!editing || Boolean(original?.revision)) && draftIsComplete(draft, places));
+  }, [active, loading, busy, editing, original, draft, places, tagValid, onReadyChange]);
   const TypeIcon = type === 'LOCATION' ? MapPin : type === 'STORAGE' ? Package : Box;
   const HeadingIcon = editing ? FolderPen : PackagePlus;
 
   return <section className="add-page" aria-label={editing ? 'Redigera föremål' : 'Lägg till föremål'}>
     <header className="inventory-header add-header">
       <h1 ref={active ? heading : null} tabIndex={-1}><HeadingIcon aria-hidden="true" /><FitText>{editing ? 'Redigera föremål' : 'Lägg till föremål'}</FitText></h1>
-      <p className="hierarchy-summary">Namn | Typ | Plats | Beskrivning</p>
+      <p className="hierarchy-summary">Namn | Typ | Plats | Beskrivning | Tagg</p>
       <div className="header-rule" />
     </header>
     {(editing && !item) || (loading && !items.length) ? <div className="empty-state" role={loading ? 'status' : 'alert'}>
@@ -78,7 +83,7 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
       {error ? <button type="button" onClick={onRetry}>Försök igen</button> : !loading && <Link to="/">Till Mitt hem</Link>}
     </div> : <form id={active ? 'inventory-item-form' : undefined} ref={active ? form : null} className="inventory-content add-fields" aria-label={editing ? 'Redigera föremålets uppgifter' : 'Uppgifter om föremålet'} onSubmit={async event => {
       event.preventDefault();
-      if (!active || loading || busyGuard.current || !draftIsComplete(draft, places) || (editing && !original?.revision)) return;
+      if (!active || loading || busyGuard.current || !tagValid || !draftIsComplete(draft, places) || (editing && !original?.revision)) return;
       busyGuard.current = true; setBusy(true); setSaveError('');
       try { onSaved(await saveInventoryItem(original?.publicId ?? newPublicId, draft, original)); }
       catch (cause) { setSaveError((cause as Error).message); }
@@ -120,6 +125,20 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
         <textarea id={`${id}-description`} value={description} onChange={event => setDraft(current => ({ ...current, description: limitWords(event.target.value) }))}
           placeholder="Beskriv föremålet…" rows={5} aria-describedby={`${id}-word-limit`} />
         <p id={`${id}-word-limit`} className="add-field-note word-count">{wordCount(description)} / {MAX_WORDS} ord</p>
+      </div>
+      <div className="add-field">
+        <label htmlFor={`${id}-tag`}>Tagg:</label>
+        <div className="add-select">
+          <InventoryIcon name={selectedTag?.icon ?? (type === 'LOCATION' ? 'map-pin' : type === 'STORAGE' ? 'package' : 'box')} />
+          <select id={`${id}-tag`} value={draft.tagId} disabled={loading} aria-describedby={`${id}-tag-note`}
+            onChange={event => setDraft(current => ({ ...current, tagId: event.target.value }))}>
+            <option value="">Ingen tagg – standardikon</option>
+            {!tagValid && <option value={draft.tagId}>Taggen är inte tillgänglig</option>}
+            {tags.map(tag => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
+          </select>
+          <ChevronDown className="select-chevron" aria-hidden="true" />
+        </div>
+        <p id={`${id}-tag-note`} className="add-field-note">{tagValid ? 'Valfri. Taggen bestämmer föremålets ikon.' : 'Välj en tillgänglig tagg eller standardikonen.'}</p>
       </div>
       {editing && <button className="delete-item-button" type="button" disabled={!active || !item || loading}
         onClick={() => setDeleteOpen(true)} aria-haspopup="dialog" title="Ta bort föremål">

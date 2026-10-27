@@ -12,7 +12,7 @@ const items = [root, box, object, child, otherBox];
 
 test('edit draft preserves all field values and string parent identities without mutating the source', () => {
   const draft = draftFor(object);
-  assert.deepEqual(draft, { name: 'Sax', type: 'OBJECT', place: '2', description: 'En befintlig beskrivning' });
+  assert.deepEqual(draft, { name: 'Sax', type: 'OBJECT', place: '2', description: 'En befintlig beskrivning', tagId: '' });
   draft.name = 'Ändrad';
   assert.equal(object.name, 'Sax');
   assert.equal(draftFor(box).place, root.id);
@@ -44,7 +44,7 @@ test('contextual add prefills the current location or storage without copying it
   for (const parent of [root, box]) {
     const draft = draftFor(undefined, parent);
     const choices = placementChoices(items, undefined, parent);
-    assert.deepEqual(draft, { name: '', type: 'OBJECT', place: parent.id, description: '' });
+    assert.deepEqual(draft, { name: '', type: 'OBJECT', place: parent.id, description: '', tagId: '' });
     assert.equal(draftIsComplete({ ...draft, name: 'Nytt föremål' }, choices), true);
     assert.equal(choices.some(choice => choice.value === otherBox.id), true);
   }

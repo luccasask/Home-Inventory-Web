@@ -1,3 +1,4 @@
+import type { InventoryTag } from './tags';
 export type ItemType = 'LOCATION' | 'STORAGE' | 'OBJECT';
 
 /** IDs are strings so PostgreSQL bigint IDs will not lose precision. */
@@ -10,6 +11,7 @@ export interface InventoryItem {
   icon: string;
   description?: string;
   revision?: string;
+  tag?: InventoryTag;
 }
 
 export function childrenOf(items: readonly InventoryItem[], parentId: string | null) {

@@ -1,4 +1,5 @@
 import type { InventoryItem, ItemType } from './inventory';
+import { mapDatabaseTag } from './tags.ts';
 
 interface ItemRow {
   id: unknown;
@@ -9,6 +10,7 @@ interface ItemRow {
   manual_icon: unknown;
   description: unknown;
   revision?: unknown;
+  category?: unknown;
 }
 
 function databaseId(value: unknown): string {
@@ -24,16 +26,18 @@ export function mapDatabaseItem(row: ItemRow): InventoryItem {
     throw new Error('Databasens föremålsformat stöds inte.');
   }
   const type = row.type as ItemType;
+  const tag = row.category == null ? undefined : mapDatabaseTag(row.category);
   return {
     id: databaseId(row.id),
     publicId: row.public_id,
     parentId: row.parent_id === null ? null : databaseId(row.parent_id),
     type,
+    tag,
     name: row.name,
     description: row.description,
     revision: typeof row.revision === 'string' && /^\d+$/.test(row.revision) ? row.revision : undefined,
-    icon: typeof row.manual_icon === 'string' && row.manual_icon ? row.manual_icon
-      : type === 'LOCATION' ? 'map-pin' : type === 'STORAGE' ? 'package' : 'box',
+    icon: tag?.icon ?? (typeof row.manual_icon === 'string' && row.manual_icon ? row.manual_icon
+      : type === 'LOCATION' ? 'map-pin' : type === 'STORAGE' ? 'package' : 'box'),
   };
 }
 

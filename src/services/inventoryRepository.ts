@@ -1,6 +1,7 @@
 import { mapDatabaseItem, validateHierarchy } from '../domain/databaseItems';
 import type { InventoryItem } from '../domain/inventory';
 import type { ItemDraft } from '../domain/itemForm';
+import { mapDatabaseTag, type InventoryTag } from '../domain/tags';
 import { configurationError, inventoryId, supabase } from './supabase';
 
 export async function loadInventory(signal: AbortSignal): Promise<readonly InventoryItem[]> {
@@ -16,7 +17,7 @@ export async function loadInventory(signal: AbortSignal): Promise<readonly Inven
     for (let offset = 0; ; offset += pageSize) {
       // Cast bigint values on the server before JSON serialization to retain all digits.
       const { data, error } = await supabase.from('items')
-        .select('id::text,public_id,parent_id::text,type,name,manual_icon,description,revision::text')
+        .select('id::text,public_id,parent_id::text,type,name,manual_icon,description,revision::text,category:tags!items_category_tag_fk(id::text,name,icon_name)')
         .eq('inventory_id', inventoryId)
         .order('id', { ascending: true })
         .range(offset, offset + pageSize - 1)
@@ -33,6 +34,20 @@ export async function loadInventory(signal: AbortSignal): Promise<readonly Inven
   }
 }
 
+export async function loadInventoryTags(signal: AbortSignal): Promise<readonly InventoryTag[]> {
+  if (!supabase) throw new Error(configurationError ?? 'Anslutningen saknas.');
+  const request = new AbortController();
+  const cancel = () => request.abort();
+  if (signal.aborted) cancel(); else signal.addEventListener('abort', cancel, { once: true });
+  const timeout = setTimeout(cancel, 20_000);
+  try {
+    const { data, error } = await supabase.from('tags').select('id::text,name,icon_name')
+      .eq('inventory_id', inventoryId).eq('web_category', true).order('name').abortSignal(request.signal);
+    if (error) throw new Error('Taggarna kunde inte hämtas. Kontrollera anslutningen och försök igen.');
+    return (data ?? []).map(mapDatabaseTag).sort((a, b) => a.name.localeCompare(b.name, 'sv'));
+  } finally { clearTimeout(timeout); signal.removeEventListener('abort', cancel); }
+}
+
 function mutationError(code?: string): Error {
   if (code === '40001') return new Error('Föremålet har ändrats på annat håll. Dina fält finns kvar. Öppna föremålet på nytt innan du sparar.');
   if (code === '42501' || code === 'PGRST301') return new Error('Du saknar behörighet eller behöver logga in igen.');
@@ -42,10 +57,11 @@ function mutationError(code?: string): Error {
 
 export async function saveInventoryItem(publicId: string, draft: ItemDraft, original?: InventoryItem): Promise<InventoryItem> {
   if (!supabase) throw new Error(configurationError ?? 'Anslutningen saknas.');
-  const { data, error } = await supabase.rpc('web_save_item', {
+  const { data, error } = await supabase.rpc('web_save_tagged_item', {
     p_inventory: inventoryId, p_public_id: publicId, p_expected_revision: original?.revision ?? null,
     p_name: draft.name.trim(), p_type: draft.type, p_parent: draft.place === 'home' ? null : draft.place,
     p_description: draft.description,
+    p_category: draft.tagId || null,
   });
   if (error) throw mutationError(error.code);
   return mapDatabaseItem(data);

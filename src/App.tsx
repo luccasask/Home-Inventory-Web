@@ -2,7 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { ArrowDown, Check, ChevronRight, CirclePlus, House, LockKeyhole, PackagePlus, RotateCw } from 'lucide-react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { ancestorsOf, childrenOf, contentLabel, routeFor, type InventoryItem } from './domain/inventory';
-import { loadInventory } from './services/inventoryRepository';
+import { loadInventory, loadInventoryTags } from './services/inventoryRepository';
+import type { InventoryTag } from './domain/tags';
 import { InventoryCard } from './components/InventoryCard';
 import { InventoryIcon } from './components/InventoryIcon';
 import { InventoryBreadcrumbs } from './components/InventoryBreadcrumbs';
@@ -30,6 +31,7 @@ export default function App() {
   const [addReady, setAddReady] = useState(false);
   const [lastHomePath, setLastHomePath] = useState('/');
   const [items, setItems] = useState<readonly InventoryItem[]>([]);
+  const [tags, setTags] = useState<readonly InventoryTag[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
   const [copyNotice, setCopyNotice] = useState<{ text: string; error: boolean } | null>(null);
@@ -91,9 +93,10 @@ export default function App() {
     activeRequest.current = controller;
     if (!background) { setLoading(true); setError(''); }
     try {
-      const result = await loadInventory(controller.signal);
+      const [result, categories] = await Promise.all([loadInventory(controller.signal), loadInventoryTags(controller.signal)]);
       if (controller.signal.aborted) return;
       setItems(result);
+      setTags(categories);
       lastRefresh.current = Date.now(); setError('');
       setStatus('Innehållet är uppdaterat från Supabase.');
     } catch (cause) {
@@ -178,7 +181,7 @@ export default function App() {
       }}>
         <PageTransition path={location.pathname} back={navigationType !== 'POP' && location.state?.direction === 'back'}
           viaPanelMenu={navigationType !== 'POP' && location.state?.navigation === 'panel'} swipeHandlers={swipeHandlers}>{active => isAdd
-          ? <AddPage items={items} loading={loading} error={error} active={active} onRetry={() => void refresh()} onReadyChange={setAddReady}
+          ? <AddPage items={items} tags={tags} loading={loading} error={error} active={active} onRetry={() => void refresh()} onReadyChange={setAddReady}
               onSaved={saved => {
                 setItems(current => [...current.filter(item => item.publicId !== saved.publicId), saved]);
                 setCopyNotice({ text: 'Föremålet är sparat', error: false });

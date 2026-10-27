@@ -1,10 +1,10 @@
 import { ancestorsOf, type InventoryItem, type ItemType } from './inventory.ts';
 
-export interface ItemDraft { name: string; type: ItemType; place: string; description: string }
+export interface ItemDraft { name: string; type: ItemType; place: string; description: string; tagId: string }
 export interface PlacementChoice { value: string; label: string }
 
 export function draftFor(item?: InventoryItem, initialParent?: InventoryItem | null): ItemDraft {
-  return { name: item?.name ?? '', type: item?.type ?? 'OBJECT', place: item ? item.parentId ?? 'home' : initialParent === null ? 'home' : initialParent?.id ?? '', description: item?.description ?? '' };
+  return { name: item?.name ?? '', type: item?.type ?? 'OBJECT', place: item ? item.parentId ?? 'home' : initialParent === null ? 'home' : initialParent?.id ?? '', description: item?.description ?? '', tagId: item?.tag?.id ?? '' };
 }
 
 export function placementChoices(items: readonly InventoryItem[], edited?: InventoryItem, _initialParent?: InventoryItem | null, type: ItemType = edited?.type ?? 'OBJECT'): PlacementChoice[] {
