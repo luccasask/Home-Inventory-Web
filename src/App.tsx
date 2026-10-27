@@ -5,11 +5,14 @@ import { ancestorsOf, childrenOf, routeFor, type InventoryItem } from './domain/
 import { loadInventory } from './services/inventoryRepository';
 import { InventoryCard } from './components/InventoryCard';
 import { InventoryIcon } from './components/InventoryIcon';
-import { BottomNavigation, ContextToolbar, type ViewMode } from './components/Navigation';
+import { BottomNavigation, ContextToolbar, SearchToolbar, type ViewMode } from './components/Navigation';
 import { FitText } from './components/FitText';
 import { PageTransition } from './components/PageTransition';
+import { SearchPage } from './components/SearchPage';
 
 export default function App() {
+  const location = useLocation();
+  const isSearch = location.pathname === '/search';
   const [items, setItems] = useState<readonly InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
@@ -22,6 +25,7 @@ export default function App() {
   const [viewTransition, setViewTransition] = useState<'idle' | 'out' | 'hidden' | 'in'>('idle');
   const changeView = (mode: ViewMode) => {
     setRequestedView(mode);
+    if (isSearch && !new URLSearchParams(location.search).get('q')?.trim()) setViewMode(mode);
   };
   useEffect(() => {
     if (viewTransition === 'idle' && requestedView !== viewMode) setViewTransition('out');
@@ -43,7 +47,6 @@ export default function App() {
       setStatus('Sidans länk har kopierats.');
     } catch { setStatus('Länken kunde inte kopieras. Kopiera adressen från adressfältet.'); }
   };
-  const location = useLocation();
   const heading = useRef<HTMLHeadingElement>(null);
   const list = useRef<HTMLDivElement>(null);
   const firstRender = useRef(true);
@@ -83,7 +86,7 @@ export default function App() {
   const ancestors = current ? ancestorsOf(items, current) : [];
   const parent = ancestors.at(-1);
   const parentRoute = parent ? routeFor(parent) : '/';
-  const title = missing && !loading && !error ? 'Hittades inte' : current?.name ?? 'Mitt hem';
+  const title = isSearch ? 'Sök' : missing && !loading && !error ? 'Hittades inte' : current?.name ?? 'Mitt hem';
   const count = children.length;
   const pathNames = [...ancestors.map(item => item.name), current?.name].filter(Boolean);
   if (current?.parentId === null) pathNames.unshift('Mitt hem');
@@ -94,7 +97,14 @@ export default function App() {
   return (
     <div className="app-shell">
       <main className={`inventory-panel inventory-panel--${viewMode}`} id="main-content">
-        <PageTransition path={location.pathname} back={location.state?.direction === 'back'}>{active => <>
+        <PageTransition path={location.pathname} back={location.state?.direction === 'back'}>{active => isSearch
+          ? <SearchPage items={items} loading={loading} error={error} viewMode={viewMode} active={active}
+              search={location.search} transition={viewTransition} onRetry={() => void refresh()}
+              onTransitionEnd={() => {
+                if (viewTransition === 'out') { setViewMode(requestedView); setViewTransition('hidden'); }
+                else if (viewTransition === 'in') setViewTransition('idle');
+              }} />
+          : <>
         <header className="inventory-header">
           <button className={`refresh-button ${loading ? 'is-loading' : ''}`} onClick={() => void refresh()} disabled={loading} aria-label="Uppdatera innehållet" title="Uppdatera"><RefreshCcw /></button>
           <h1 ref={active ? heading : null} tabIndex={-1}>{current ? <InventoryIcon name={current.icon} /> : <House aria-hidden="true" />}<FitText>{title}</FitText></h1>
@@ -125,7 +135,8 @@ export default function App() {
         </div>
 
         </>}</PageTransition>
-        <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={requestedView} onViewChange={changeView} onCopy={() => void copyLink()} />
+        {isSearch ? <SearchToolbar viewMode={requestedView} onViewChange={changeView} />
+          : <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={requestedView} onViewChange={changeView} onCopy={() => void copyLink()} />}
       </main>
       <BottomNavigation />
       <span className="sr-only">{loading ? 'Ansluter till Supabase…' : error ? 'Supabase · Ingen anslutning' : 'Supabase · Endast läsning'}</span>

@@ -1,5 +1,15 @@
 # Home browsing verification
 
+## Search addition — 27 October 2026
+
+- Nine domain tests pass, including ranking, cross-parent results, type filters, spelling mistakes, Swedish letters, and empty queries.
+- Browser checks cover centered search, submit, ranked results, all three filters, list/grid switching, empty states, clear, opening a result, browser Back, and URL reload persistence.
+- Responsive checks at 430 × 932, 320 × 640, and desktop; no horizontal overflow.
+- Existing navigation and copy behavior retained. Search uses existing read-only inventory data; database privileges are unchanged.
+- Real iPhone keyboard behavior remains a device check.
+
+## Original browsing verification
+
 Verified locally on 24 October 2026.
 
 - TypeScript project compilation passed.

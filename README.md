@@ -8,7 +8,8 @@ React + TypeScript + Vite home inventory browser, based on the three supplied Sw
 - Back, parent, home, and refresh controls.
 - Stable hash links and a missing-link state.
 - App manifest, standalone display, PNG icons, and Apple touch icon.
-- Search, add, edit, and delete controls are intentionally disabled.
+- Search across the entire inventory, ranked results, type filters, and list/grid views.
+- Add, edit, and delete controls are intentionally disabled.
 
 **Content is loaded directly from the existing Supabase PostgreSQL inventory.** The owner explicitly chose no sign-in and public read-only access. Names, descriptions, hierarchy, and contents of this inventory (including future records) are therefore publicly readable through its API. Other inventories, tags, access mappings, and write operations remain inaccessible to anonymous visitors. Refresh reads current database contents. Existing item IDs and public UUIDs are preserved; no inventory records were inserted, changed, or deleted.
 
@@ -62,4 +63,12 @@ Manifest paths are relative to the repository base. On iPhone, use Safari → Sh
 
 `supabase/rollback_public_web_read.sql` revokes the web reading added by this migration without removing any inventory records. Privileged migrations should be run only from a trusted administrator session, never from the frontend or GitHub Pages build.
 
-Tags and tag-derived icons are not loaded in this version, as requested. Known manual Lucide icons are supported; missing/unsupported icons use a type-based or box fallback. Search and data editing remain outside this version's scope.
+Tags and tag-derived icons are not loaded in this version, as requested. Known manual Lucide icons are supported; missing/unsupported icons use a type-based or box fallback. Data editing remains outside this version's scope.
+
+## Search
+
+Open the search icon in the bottom navigation. Submit with Enter, the mobile keyboard's search action, or the search button. The centered field moves to the top and results appear below it. Results search all loaded items, independently of their parents; opening a result uses the item's existing stable URL.
+
+Ranking prioritizes exact names, name prefixes, partial names, all query words in the name, descriptions, ancestor placement, and finally small spelling mistakes in names. Swedish letters remain distinct. Tags, synonyms, and hypernyms are not searched: the public web role has no access to that data and no new database access is granted.
+
+The three type buttons select locations, storage, or objects. Select the active filter again to show all types. List/grid selection is shared with browsing and saved locally. The query and optional type filter are kept in the hash URL (`#/search?q=kastrull&type=OBJECT`) so reload and browser Back restore the search.
