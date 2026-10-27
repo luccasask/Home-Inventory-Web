@@ -1,5 +1,13 @@
 # Home browsing verification
 
+## Main-panel direction and toolbar sizing — 27 October 2026
+
+- Thirteen tests pass, including all six main-panel directions and regressions for search-result, parent, and browser-history navigation.
+- Browser check confirms Add → Search exits right and enters left; Search → Add reverses this. Search-result links still open forward and parent links backward.
+- All three action panels have identical bounds: 402 × 83 at 430px, 298 × 83 at 320px, and 520 × 83 at 1024px. Vertical position also matches at each viewport.
+- Save remains disabled. The preview notice is in the form, so it no longer changes the action-panel height.
+- Save readiness: empty fields, whitespace-only names, and missing locations stay gray; complete name/type/location selections turn teal; clearing a required field restores gray. Saving remains disabled in every state.
+
 ## Add-item visual preview — 27 October 2026
 
 - Add form opens from bottom navigation and the browse add tile. Save is disabled and form submission is prevented; no database write service was added.

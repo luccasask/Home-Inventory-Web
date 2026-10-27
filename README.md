@@ -78,3 +78,11 @@ The three type buttons select locations, storage, or objects. Select the active 
 The rightmost bottom-navigation icon and the add tile open `#/add`. This is a visual form only: the Save button is disabled, form submission is prevented, and no database write service is connected. Drafts stay in component memory and are reset when leaving and returning, including quick navigation during a page slide. Drafts are not stored in local storage or the URL.
 
 Fields are name (up to 120 characters), type (location/storage/object), an existing location, and description (up to 200 words, with a live counter and paste truncation). The location selector includes only existing `LOCATION` records and shows full paths to distinguish matching names. Tags are deferred. The bottom menu marks the current inventory, search, or add section with a light underline.
+
+The Save button is gray until a nonblank name, a valid type, and an existing location are selected; it then turns teal as a visual readiness cue. It remains disabled in this preview and never writes data.
+
+## Panel navigation
+
+Main-menu clicks follow the visual order Home → Search → Add. Selecting a panel to the left moves the outgoing page to the right and brings the selected page in from the left; selecting a panel to the right reverses this. Opening items (including search results), parent links, and browser Back/Forward retain their separate direction rules. Transitions remain 200ms without delaying navigation.
+
+Inventory actions, search controls, and the disabled Save button share the Home toolbar's dimensions and placement: 83px high and full available width on mobile, capped at 520px on desktop.

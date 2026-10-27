@@ -54,9 +54,9 @@ export function BottomNavigation() {
   const location = useLocation();
   return (
     <nav className="bottom-navigation" aria-label="Huvudnavigation">
-      <Link className="home-link" to="/" state={{ direction: 'back' }} aria-label="Mitt hem" aria-current={!['/search', '/add'].includes(location.pathname) ? 'page' : undefined}><House /></Link>
-      <Link to="/search" aria-label="Sök" aria-current={location.pathname === '/search' ? 'page' : undefined}><Search /></Link>
-      <Link to="/add" aria-label="Lägg till föremål" aria-current={location.pathname === '/add' ? 'page' : undefined}><PackagePlus /></Link>
+      <Link className="home-link" to="/" state={{ direction: 'back', navigation: 'panel' }} aria-label="Mitt hem" aria-current={!['/search', '/add'].includes(location.pathname) ? 'page' : undefined}><House /></Link>
+      <Link to="/search" state={{ navigation: 'panel' }} aria-label="Sök" aria-current={location.pathname === '/search' ? 'page' : undefined}><Search /></Link>
+      <Link to="/add" state={{ navigation: 'panel' }} aria-label="Lägg till föremål" aria-current={location.pathname === '/add' ? 'page' : undefined}><PackagePlus /></Link>
     </nav>
   );
 }

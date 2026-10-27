@@ -1,10 +1,11 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { pageDirection } from '../domain/navigation';
 
 type Page = { path: string; index: number; render: (active: boolean) => ReactNode };
 
 /** Keep the outgoing page visible while the new route slides in immediately. */
-export function PageTransition({ path, back, children }: {
-  path: string; back: boolean; children: (active: boolean) => ReactNode;
+export function PageTransition({ path, back, viaPanelMenu, children }: {
+  path: string; back: boolean; viaPanelMenu: boolean; children: (active: boolean) => ReactNode;
 }) {
   const index: number = window.history.state?.idx ?? 0;
   const lastPage = useRef<Page>({ path, index, render: children });
@@ -14,7 +15,8 @@ export function PageTransition({ path, back, children }: {
 
   if (transition.path !== path) {
     setTransition({ path, previous: lastPage.current,
-      direction: back || index < lastPage.current.index ? 'back' : 'forward' });
+      direction: pageDirection({ from: lastPage.current.path, to: path, viaPanelMenu, back,
+        previousIndex: lastPage.current.index, nextIndex: index }) });
   }
   useLayoutEffect(() => { lastPage.current = { path, index, render: children }; });
 

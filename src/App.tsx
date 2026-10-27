@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { House, PackagePlus, Plus, RefreshCcw } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigationType } from 'react-router-dom';
 import { ancestorsOf, childrenOf, routeFor, type InventoryItem } from './domain/inventory';
 import { loadInventory } from './services/inventoryRepository';
 import { InventoryCard } from './components/InventoryCard';
@@ -13,8 +13,10 @@ import { AddPage, AddSavePanel } from './components/AddPage';
 
 export default function App() {
   const location = useLocation();
+  const navigationType = useNavigationType();
   const isSearch = location.pathname === '/search';
   const isAdd = location.pathname === '/add';
+  const [addReady, setAddReady] = useState(false);
   const [items, setItems] = useState<readonly InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
@@ -107,8 +109,9 @@ export default function App() {
   return (
     <div className="app-shell">
       <main className={`inventory-panel inventory-panel--${viewMode}`} id="main-content">
-        <PageTransition path={location.pathname} back={location.state?.direction === 'back'}>{active => isAdd
-          ? <AddPage items={items} loading={loading} error={error} active={active} onRetry={() => void refresh()} />
+        <PageTransition path={location.pathname} back={location.state?.direction === 'back'}
+          viaPanelMenu={navigationType !== 'POP' && location.state?.navigation === 'panel'}>{active => isAdd
+          ? <AddPage items={items} loading={loading} error={error} active={active} onRetry={() => void refresh()} onReadyChange={setAddReady} />
           : isSearch
           ? <SearchPage items={items} loading={loading} error={error} viewMode={viewMode} active={active}
               search={location.search} transition={viewTransition} onRetry={() => void refresh()}
@@ -147,7 +150,7 @@ export default function App() {
         </div>
 
         </>}</PageTransition>
-        {isAdd ? <AddSavePanel /> : isSearch ? <SearchToolbar viewMode={requestedView} onViewChange={changeView} />
+        {isAdd ? <AddSavePanel ready={addReady} /> : isSearch ? <SearchToolbar viewMode={requestedView} onViewChange={changeView} />
           : <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={requestedView} onViewChange={changeView} onCopy={() => void copyLink()} />}
       </main>
       <BottomNavigation />

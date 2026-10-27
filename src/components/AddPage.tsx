@@ -16,8 +16,9 @@ function limitWords(text: string) {
 }
 
 /** Local visual draft only. This component has no persistence or write service. */
-export function AddPage({ items, loading, error, active, onRetry }: {
+export function AddPage({ items, loading, error, active, onRetry, onReadyChange }: {
   items: readonly InventoryItem[]; loading: boolean; error: string; active: boolean; onRetry: () => void;
+  onReadyChange: (ready: boolean) => void;
 }) {
   const id = useId();
   const [name, setName] = useState('');
@@ -42,6 +43,10 @@ export function AddPage({ items, loading, error, active, onRetry }: {
   const places = useMemo(() => items.filter(item => item.type === 'LOCATION').map(item => ({
     id: item.id, label: [...ancestorsOf(items, item).map(parent => parent.name), item.name].join(' → '),
   })).sort((a, b) => a.label.localeCompare(b.label, 'sv')), [items]);
+  useLayoutEffect(() => {
+    onReadyChange(active && Boolean(name.trim()) && ['LOCATION', 'STORAGE', 'OBJECT'].includes(type)
+      && places.some(option => option.id === place));
+  }, [active, name, type, place, places, onReadyChange]);
   const TypeIcon = type === 'LOCATION' ? MapPin : type === 'STORAGE' ? Package : Box;
 
   return <section className="add-page" aria-label="Lägg till föremål">
@@ -85,15 +90,16 @@ export function AddPage({ items, loading, error, active, onRetry }: {
           placeholder="Beskriv föremålet…" rows={5} aria-describedby={`${id}-word-limit`} />
         <p id={`${id}-word-limit`} className="add-field-note word-count">{wordCount(description)} / {MAX_WORDS} ord</p>
       </div>
+      <p className="add-field-note">Sparande är inte aktiverat ännu.</p>
     </form>
   </section>;
 }
 
-export function AddSavePanel() {
+export function AddSavePanel({ ready }: { ready: boolean }) {
   return <div className="add-save-panel">
-    <button className="add-save-button" type="button" disabled aria-describedby="add-save-note" title="Sparande är inte aktiverat ännu">
+    <button className={`context-toolbar add-save-button${ready ? ' add-save-button--ready' : ''}`} type="button" disabled aria-describedby="add-save-note" title="Sparande är inte aktiverat ännu">
       <Save aria-hidden="true" /><span>Spara</span>
     </button>
-    <p id="add-save-note" className="add-save-note">Sparande är inte aktiverat ännu.</p>
+    <span id="add-save-note" className="sr-only">Sparande är inte aktiverat ännu.</span>
   </div>;
 }

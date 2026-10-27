@@ -203,7 +203,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 }
 @media (min-width: 700px) {
   .search-header { left: 70px; right: 70px; }
-  .search-toolbar { max-width: 600px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .search-header, .search-summary, .search-header .header-rule, .search-form .search-submit { transition: none; }
@@ -228,13 +227,13 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .add-field-note { margin: 6px 4px 0; color: #656464; font-size: 13px; line-height: 1.4; }
 .add-field-note button { border: 0; background: none; color: var(--navy); text-decoration: underline; }
 .word-count { text-align: right; }
-.add-save-panel { flex-shrink: 0; width: 100%; max-width: 600px; align-self: center; padding: 0 26px; margin-top: 12px; }
-.add-save-button { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; height: 83px; border: 4px solid var(--teal); border-radius: 25px; background: var(--cream); color: var(--teal); font-size: 42px; font-weight: 900; opacity: 1; }
+.add-save-panel { display: flex; flex-direction: column; flex-shrink: 0; width: 100%; }
+.add-save-button { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; height: 83px; border: 4px solid #a7aaa7; border-radius: 25px; background: var(--cream); color: #a7aaa7; font-size: 42px; font-weight: 900; opacity: 1; }
+.add-save-button--ready { border-color: var(--teal); color: var(--teal); }
 .add-save-button svg { width: 48px; height: 48px; }
-.add-save-note { margin: 6px 0 0; color: #656464; text-align: center; font-size: 12px; line-height: 1.3; }
 @media (max-width: 374px) {
   .add-header { padding-inline: 6px; }
-  .add-fields, .add-save-panel { padding-inline: 14px; }
+  .add-fields { padding-inline: 14px; }
   .add-field label { font-size: 21px; }
   .add-field input, .add-field select { font-size: 21px; }
   .bottom-navigation > a[aria-current="page"]::after { width: 80px; }
