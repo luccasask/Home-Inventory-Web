@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import type { InventoryItem, ItemType } from '../domain/inventory';
 import { draftFor, draftIsComplete, placementChoices } from '../domain/itemForm';
 import { FitText } from './FitText';
+import { DeleteConfirmation } from './DeleteConfirmation';
 
 const MAX_WORDS = 200;
 function wordCount(text: string) {
@@ -25,6 +26,7 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
 }) {
   const id = useId();
   const [draft, setDraft] = useState(() => draftFor(item, initialParent));
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const { name, type, place, description } = draft;
   const heading = useRef<HTMLHeadingElement>(null);
   const form = useRef<HTMLFormElement>(null);
@@ -32,6 +34,7 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
   const draftKey = item?.id ?? (initialParent === null ? 'home' : initialParent?.id);
   const initializedItem = useRef(draftKey);
   useLayoutEffect(() => {
+    setDeleteOpen(false);
     if (active) {
       // A quick return can reuse the departing page during its slide. Reset the
       // draft before painting it again, while keeping the exit animation intact.
@@ -94,11 +97,13 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
           placeholder="Beskriv föremålet…" rows={5} aria-describedby={`${id}-word-limit`} />
         <p id={`${id}-word-limit`} className="add-field-note word-count">{wordCount(description)} / {MAX_WORDS} ord</p>
       </div>
-      {editing && <button className="delete-item-button" type="button" disabled title="Borttagning är inte aktiverad ännu" aria-describedby={`${id}-preview-note`}>
+      {editing && <button className="delete-item-button" type="button" disabled={!active || !item || loading}
+        onClick={() => setDeleteOpen(true)} aria-haspopup="dialog" title="Ta bort föremål">
         <Trash2 aria-hidden="true" /><span>Ta bort föremål</span>
       </button>}
       <p id={`${id}-preview-note`} className="add-field-note">{editing ? 'Sparande och borttagning är inte aktiverat ännu.' : 'Sparande är inte aktiverat ännu.'}</p>
     </form>}
+    {active && editing && item && deleteOpen && <DeleteConfirmation onDismiss={() => setDeleteOpen(false)} />}
   </section>;
 }
 

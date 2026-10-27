@@ -237,6 +237,16 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .word-count { text-align: right; }
 .delete-item-button { display: flex; flex-direction: column; align-items: center; gap: 7px; margin: 28px auto 22px; padding: 12px 20px; border: 0; background: none; color: #656464; font: inherit; font-size: 14px; font-weight: 600; opacity: 1; }
 .delete-item-button svg { width: 46px; height: 48px; stroke-width: 2; }
+.delete-confirmation { width: min(520px, calc(100% - 48px)); max-height: calc(100dvh - 40px); margin: auto; padding: 20px; border: 4px solid #d9534f; border-radius: 20px; background: var(--cream); color: var(--navy); overflow-y: auto; }
+.delete-confirmation::backdrop { background: rgb(253 252 245 / 85%); }
+.delete-confirmation h2 { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0; font-size: clamp(18px, 4.5vw, 24px); font-weight: 900; line-height: 1.25; }
+.delete-confirmation h2 svg { width: 32px; height: 34px; flex-shrink: 0; color: #d9534f; stroke-width: 2.5; }
+.delete-confirmation p { margin: 12px 0 18px; text-align: center; color: #656464; font-size: 14px; line-height: 1.4; }
+.delete-confirmation-actions { display: flex; gap: 12px; }
+.delete-confirmation-actions button { flex: 1; min-width: 0; min-height: 48px; padding: 9px; border: 0; border-radius: 13px; color: var(--cream); font-size: 24px; font-weight: 900; }
+.delete-confirmation-delete { background: #d9534f; opacity: 1; }
+.delete-confirmation-cancel { background: var(--teal); }
+.delete-confirmation .delete-confirmation-note { margin: 12px 0 0; font-size: 12px; }
 .add-save-panel { display: flex; flex-direction: column; flex-shrink: 0; width: 100%; }
 .add-save-button { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; height: 83px; border: 4px solid #a7aaa7; border-radius: 25px; background: var(--cream); color: #a7aaa7; font-size: 42px; font-weight: 900; opacity: 1; }
 .add-save-button--ready { border-color: var(--teal); color: var(--teal); }

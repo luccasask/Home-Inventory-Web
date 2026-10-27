@@ -1,5 +1,11 @@
 # Home browsing verification
 
+## Delete confirmation preview — 27 October 2026
+
+- The editor's trash control opens a native modal dialog matching the reference: pale backdrop, red border/warning icon, red Radera and teal Avbryt. Radera is disabled and no deletion callback or data write exists.
+- Avbryt, backdrop clicks and Escape dismiss it. Native modal behavior isolates the background; pointer events do not initiate page swipes. Initial focus goes to Avbryt and closing restores the trash control.
+- Browser checks cover all three dismissal methods, repeated reopening, draft preservation, disabled Radera, no console errors and fit at 430 × 932 and 320 × 640 (272px-wide dialog, no internal horizontal overflow). TypeScript, production build and whitespace checks pass.
+
 ## Type colors, object cards and search text — 27 October 2026
 
 - Add/edit type selector colors its border, text and both icons navy for LOCATION, teal for STORAGE and amber for OBJECT. Other form fields retain their existing colors.
