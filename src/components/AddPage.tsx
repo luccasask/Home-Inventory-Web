@@ -1,5 +1,5 @@
 import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Box, ChevronDown, MapPin, Package, PackagePlus, Save, Trash2 } from 'lucide-react';
+import { Box, ChevronDown, FolderPen, MapPin, Package, PackagePlus, Save, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { InventoryItem, ItemType } from '../domain/inventory';
 import { draftFor, draftIsComplete, placementChoices } from '../domain/itemForm';
@@ -52,10 +52,11 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
     onReadyChange(active && (!editing || Boolean(item)) && draftIsComplete(draft, places));
   }, [active, editing, item, draft, places, onReadyChange]);
   const TypeIcon = type === 'LOCATION' ? MapPin : type === 'STORAGE' ? Package : Box;
+  const HeadingIcon = editing ? FolderPen : PackagePlus;
 
   return <section className="add-page" aria-label={editing ? 'Redigera föremål' : 'Lägg till föremål'}>
     <header className="inventory-header add-header">
-      <h1 ref={active ? heading : null} tabIndex={-1}><PackagePlus aria-hidden="true" /><FitText>Lägg till föremål</FitText></h1>
+      <h1 ref={active ? heading : null} tabIndex={-1}><HeadingIcon aria-hidden="true" /><FitText>{editing ? 'Redigera föremål' : 'Lägg till föremål'}</FitText></h1>
       <p className="hierarchy-summary">Namn | Typ | Plats | Beskrivning</p>
       <div className="header-rule" />
     </header>

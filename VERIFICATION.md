@@ -1,5 +1,15 @@
 # Home browsing verification
 
+## Audit fixes 1–6 — 27 October 2026
+
+- Search stores session-local scroll positions by query, type filter and view mode. Restoration waits for the new layout and two animation frames without blocking navigation; intermediate layout scrolls are ignored. Result clicks save the position before browser focus can adjust it. Native-scroll/click/back tests restored list position exactly at 1864px and grid position at 618px; changing back to list retained 1864px, while a new query started at 0.
+- Search list cards show `Mitt hem → …` for their ancestors, with normal wrapping and matching hover text colors. Grid result cards and normal browsing cards do not receive the path. The two Sovrum results visibly distinguish Test hem from Lägenhet; grid path node count is zero.
+- Colored text is modestly darkened while original type borders/icons stay unchanged. Cream-background contrast increases to roughly 3.40 for orange text, 3.36 for teal and 2.93 for amber. Cancel background is slightly darker too; navy text is unchanged.
+- Edit heading is now Redigera föremål with FolderPen. Normal Add keeps Lägg till föremål and PackagePlus; prefilled values and disabled writes are unchanged.
+- Copy shows a visible, non-interactive Länk kopierad toast for 2.8 seconds, with accessible status feedback. Failures have a visible error message. Success display and automatic dismissal were tested.
+- Selected Package keeps its navy fill and gets a short cream tape stripe inside its silhouette. Selected Box keeps its simpler solid fill, making the filters distinct without restoring the old inverted interior edges.
+- Browser checks at 430px and 320px confirm list-path layout, no horizontal overflow, correct edit heading/icon, type text/border colors, distinguishable filters and no console errors. All 35 existing tests, TypeScript, production build and whitespace checks pass. No database mutations or changes to the remaining audit items were added.
+
 ## Text-led heading balance and trailing descriptions — 27 October 2026
 
 - Descriptions follow the complete content list in both modes again. Grid descriptions retain a 20px gap after the icons.

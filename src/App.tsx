@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { House, PackagePlus, Plus } from 'lucide-react';
+import { Check, House, PackagePlus, Plus } from 'lucide-react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { ancestorsOf, childrenOf, contentLabel, routeFor, type InventoryItem } from './domain/inventory';
 import { loadInventory } from './services/inventoryRepository';
@@ -29,6 +29,8 @@ export default function App() {
   const [items, setItems] = useState<readonly InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
+  const [copyNotice, setCopyNotice] = useState<{ text: string; error: boolean } | null>(null);
+  const searchScrollPositions = useRef(new Map<string, number>());
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     try { return localStorage.getItem('inventory-view') === 'grid' ? 'grid' : 'list'; }
@@ -65,9 +67,14 @@ export default function App() {
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      setStatus('Sidans länk har kopierats.');
-    } catch { setStatus('Länken kunde inte kopieras. Kopiera adressen från adressfältet.'); }
+      setCopyNotice({ text: 'Länk kopierad', error: false });
+    } catch { setCopyNotice({ text: 'Länken kunde inte kopieras. Kopiera adressen från adressfältet.', error: true }); }
   };
+  useEffect(() => {
+    if (!copyNotice) return;
+    const timer = window.setTimeout(() => setCopyNotice(null), copyNotice.error ? 5000 : 2800);
+    return () => window.clearTimeout(timer);
+  }, [copyNotice]);
   const heading = useRef<HTMLHeadingElement>(null);
   const list = useRef<HTMLDivElement>(null);
   const firstRender = useRef(true);
@@ -138,6 +145,7 @@ export default function App() {
               editing={Boolean(editId)} item={editingItem} initialParent={initialParent} />
           : isSearch
           ? <SearchPage items={items} loading={loading} error={error} viewMode={viewMode} active={active}
+              scrollPositions={searchScrollPositions.current}
               search={location.search} transition={viewTransition} onRetry={() => void refresh()}
               onTransitionEnd={() => {
                 if (viewTransition === 'out') { setViewMode(requestedView); setViewTransition('hidden'); }
@@ -180,6 +188,9 @@ export default function App() {
               editRoute={current ? `/add/${current.publicId}` : undefined} />}
       </main>
       <BottomNavigation lastHomePath={lastHomePath} />
+      {copyNotice && <div className="copy-toast" role={copyNotice.error ? 'alert' : 'status'}>
+        {!copyNotice.error && <Check aria-hidden="true" />}<span>{copyNotice.text}</span>
+      </div>}
       <span className="sr-only">{loading ? 'Ansluter till Supabase…' : error ? 'Supabase · Ingen anslutning' : 'Supabase · Endast läsning'}</span>
       <span role="status" className="sr-only">{status}</span>
     </div>

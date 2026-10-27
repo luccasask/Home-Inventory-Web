@@ -8,7 +8,7 @@ React + TypeScript + Vite home inventory browser, based on the three supplied Sw
 - Back, parent, home, and refresh controls.
 - Stable hash links and a missing-link state.
 - App manifest, standalone display, PNG icons, and Apple touch icon.
-- Search across the entire inventory, ranked results, type filters, and list/grid views.
+- Search across the entire inventory, ranked results, type filters, and list/grid views. List results show their parent path; each query/filter/view retains its scroll position during the app session.
 - Visual add/edit form with existing-place selection; database saving and deleting remain disabled.
 - Touch/pen swipes: right returns a directly opened search result to its original query and filter; other items go to their parent, editors return to the edited item, and main panels follow menu order. Left moves to the next main panel. Vertical scrolling and form controls retain native interactions.
 

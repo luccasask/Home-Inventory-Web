@@ -34,7 +34,8 @@ export function SearchToolbar({ viewMode, onViewChange }: { viewMode: ViewMode; 
             const next = new URLSearchParams(params);
             if (selected === type) next.delete('type'); else next.set('type', type);
             setParams(next, { replace: true });
-          }}><Icon aria-hidden="true" /></button>)}
+          }}><Icon aria-hidden="true">{type === 'STORAGE' && selected === type
+            && <path className="package-tape-marker" d="m8.5 5.2 7 4" />}</Icon></button>)}
     </div>
     <div className="search-view-controls" role="group" aria-label="Visningsläge">
       <button type="button" onClick={() => onViewChange('grid')} aria-pressed={viewMode === 'grid'} aria-label="Visa som grid" title="Visa som grid"><LayoutGrid /></button>
