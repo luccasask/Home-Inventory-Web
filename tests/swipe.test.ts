@@ -2,11 +2,35 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SwipeTracker, swipeDirection, swipeTarget } from '../src/domain/swipe.ts';
 import type { InventoryItem } from '../src/domain/inventory.ts';
+import { isIOSSafari, shouldGuardSafariEdge } from '../src/domain/safariEdge.ts';
 
 const place: InventoryItem = { id: '1', publicId: 'place', parentId: null, type: 'LOCATION', name: 'Kök', icon: 'map-pin' };
 const box: InventoryItem = { ...place, id: '2', publicId: 'box', parentId: '1', type: 'STORAGE', name: 'Låda' };
 const item: InventoryItem = { ...place, id: '3', publicId: 'item', parentId: '2', type: 'OBJECT', name: 'Sax' };
 const items = [place, box, item];
+
+test('Safari edge protection is limited to iPhone/iPad Safari', () => {
+  assert.equal(isIOSSafari('Mozilla/5.0 (iPhone) AppleWebKit/605.1.15 Version/26.0 Mobile/15E148 Safari/604.1', 5), true);
+  assert.equal(isIOSSafari('Mozilla/5.0 (Macintosh) Version/26.0 Safari/605.1.15', 5), true);
+  assert.equal(isIOSSafari('Mozilla/5.0 (Macintosh) Version/26.0 Safari/605.1.15', 0), false);
+  assert.equal(isIOSSafari('Mozilla/5.0 (iPhone) CriOS/140.0 Mobile Safari/604.1', 5), false);
+  assert.equal(isIOSSafari('Mozilla/5.0 (iPhone) FxiOS/140.0 Mobile Safari/604.1', 5), false);
+});
+
+const edge = { x: 4, y: 200, width: 430, page: { left: 14, right: 416, top: 8, bottom: 756 }, touchCount: 1, zoom: 1, pageScrollable: false };
+test('only the viewport edge outside the scrolling page claims a gesture', () => {
+  assert.equal(shouldGuardSafariEdge(edge), true);
+  assert.equal(shouldGuardSafariEdge({ ...edge, x: 426 }), true);
+  for (const x of [-1, 14, 20, 215, 416, 431]) assert.equal(shouldGuardSafariEdge({ ...edge, x }), false);
+});
+
+test('toolbars, pinch zoom and scrollable documents are not intercepted', () => {
+  assert.equal(shouldGuardSafariEdge({ ...edge, y: 760 }), false);
+  assert.equal(shouldGuardSafariEdge({ ...edge, y: 0 }), false);
+  assert.equal(shouldGuardSafariEdge({ ...edge, touchCount: 2 }), false);
+  assert.equal(shouldGuardSafariEdge({ ...edge, zoom: 1.5 }), false);
+  assert.equal(shouldGuardSafariEdge({ ...edge, pageScrollable: true }), false);
+});
 
 test('left swipes retain forward panel navigation without wrapping', () => {
   assert.deepEqual(swipeTarget('/', items, 'left'), { path: '/search', panel: true });

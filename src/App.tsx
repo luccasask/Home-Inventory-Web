@@ -15,6 +15,8 @@ import { isAddPath } from './domain/navigation';
 import { swipeTarget } from './domain/swipe';
 import { useSwipeNavigation } from './components/useSwipeNavigation';
 import { useControlFeedback } from './components/useControlFeedback';
+import { useSafariEdgeSwipe } from './components/useSafariEdgeSwipe';
+import type { SwipeDirection } from './domain/swipe';
 
 export default function App() {
   const location = useLocation();
@@ -31,6 +33,7 @@ export default function App() {
   const [status, setStatus] = useState('');
   const [copyNotice, setCopyNotice] = useState<{ text: string; error: boolean } | null>(null);
   const searchScrollPositions = useRef(new Map<string, number>());
+  const mainPanel = useRef<HTMLElement>(null);
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     try { return localStorage.getItem('inventory-view') === 'grid' ? 'grid' : 'list'; }
@@ -115,11 +118,15 @@ export default function App() {
   useLayoutEffect(() => {
     if (location.pathname === '/' || current) setLastHomePath(location.pathname);
   }, [location.pathname, current?.id]);
-  const swipeHandlers = useSwipeNavigation(location.key, direction => {
+  const handleSwipe = (direction: SwipeDirection) => {
     const target = swipeTarget(location.pathname, items, direction, location.state?.searchReturn);
     if (!target) return;
     navigate(target.panel && target.path === '/' ? lastHomePath : target.path,
       { state: target.panel ? { navigation: 'panel' } : { direction: 'back' } });
+  };
+  const swipeHandlers = useSwipeNavigation(location.key, handleSwipe);
+  useSafariEdgeSwipe(mainPanel, location.key, handleSwipe, () => {
+    if (isSearch) mainPanel.current?.querySelector<HTMLInputElement>('.inventory-page:not([aria-hidden="true"]) .search-form input')?.focus({ preventScroll: true });
   });
   const isHome = location.pathname === '/';
   const missing = !isHome && !current;
@@ -134,7 +141,7 @@ export default function App() {
 
   return (
     <div className="app-shell" {...controlFeedback}>
-      <main className={`inventory-panel inventory-panel--${viewMode}`} id="main-content" onClick={event => {
+      <main ref={mainPanel} className={`inventory-panel inventory-panel--${viewMode}`} id="main-content" onClick={event => {
         if (!isSearch || event.defaultPrevented || !(event.target instanceof Element)
           || event.target.closest('a, button, input, select, textarea, nav, dialog')) return;
         event.currentTarget.querySelector<HTMLInputElement>('.inventory-page:not([aria-hidden="true"]) .search-form input')?.focus({ preventScroll: true });

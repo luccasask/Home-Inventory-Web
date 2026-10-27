@@ -1,5 +1,12 @@
 # Home browsing verification
 
+## Conservative Safari edge gesture guard — 27 October 2026
+
+- iPhone/iPad Safari now claims single-finger starts in the empty outer gutter above the action panel, using a non-passive touchstart listener. Completed horizontal gestures use the same app navigation callback as normal swipes; stationary gutter taps retain Search's focus behavior.
+- The guard deliberately excludes page content, links, buttons, fields, toolbar, zoomed viewports, an open on-screen keyboard and scrollable documents. It does not globally disable Safari navigation or take over vertical content scrolling. Additional fingers, cancellation and route changes abandon the tracked gesture.
+- This targets Safari's native Back/Forward conflict in the outer margins. Source: WebKit issue 240892 notes the iOS touchstart preventDefault workaround; the Apple Safari Web Content Guide documents cancellation of default touch behavior. It is not a guarantee for all Safari/system edge gestures.
+- All 38 tests pass, including three new cases for iOS Safari detection, gutter boundaries and native-interaction exclusions. TypeScript, production build and whitespace checks pass. Desktop browser regressions cover search → item → editor and no console errors. Physical Safari navigation/pinch behavior still requires a real iPhone test.
+
 ## Audit fixes 1–6 — 27 October 2026
 
 - Search stores session-local scroll positions by query, type filter and view mode. Restoration waits for the new layout and two animation frames without blocking navigation; intermediate layout scrolls are ignored. Result clicks save the position before browser focus can adjust it. Native-scroll/click/back tests restored list position exactly at 1864px and grid position at 618px; changing back to list retained 1864px, while a new query started at 0.
