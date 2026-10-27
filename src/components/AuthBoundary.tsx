@@ -5,6 +5,7 @@ import { Delete, House, LockKeyhole, Mail } from 'lucide-react';
 import { configurationError, inventoryId, supabase } from '../services/supabase';
 import { checkPin, createPin, pinKey, readPin } from '../services/deviceLock';
 import { useControlFeedback } from './useControlFeedback';
+import { authErrorMessage } from '../domain/authErrors';
 
 function authSessionId(session: Session): string {
   try {
@@ -27,6 +28,7 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
   const [pin, setPin] = useState('');
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [emailCode, setEmailCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -45,7 +47,7 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
     // Do not await another Supabase call inside its auth callback (client lock).
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
     supabase.auth.getSession().then(({ data, error }) => {
-      if (error) setError('Inloggningen kunde inte läsas. Försök logga in igen.');
+      if (error) setError(authErrorMessage(error, 'session'));
       setSession(data.session); setChecking(false);
     });
     return () => subscription.unsubscribe();
@@ -86,7 +88,8 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
   useEffect(() => {
     const lock = () => {
       visibilityGeneration.current++;
-      setLocked(true); setPin(''); setFirstPin(''); setMessage(''); setError('');
+      setLocked(true); setPin(''); setFirstPin('');
+      if (userId) { setMessage(''); setError(''); }
       window.dispatchEvent(new Event('inventory-locked'));
     };
     const visibility = () => { if (document.visibilityState === 'hidden') lock(); };
@@ -140,7 +143,7 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
       const { error } = await supabase!.auth.signOut({ scope: 'local' });
       if (error) throw error;
       if (reset && userId && session) localStorage.setItem('inventory-reset-pin', JSON.stringify({ user: userId, previousSession: authSessionId(session) }));
-      setSession(null); setSent(false); setMessage(reset ? 'Logga in via mejl för att välja en ny pinkod.' : 'Du är utloggad på den här enheten.');
+      setSession(null); setSent(false); setEmailCode(''); setMessage(reset ? 'Logga in via mejl för att välja en ny pinkod.' : 'Du är utloggad på den här enheten.');
     } catch { setError('Det gick inte att logga ut. Försök igen.'); }
     finally { setBusy(false); }
   }
@@ -163,15 +166,33 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
                 shouldCreateUser: false, emailRedirectTo: window.location.origin + window.location.pathname,
               } });
               if (error) throw error;
-              setSent(true); setEmailCooldown(Date.now() + 60_000); setNow(Date.now());
-            } catch { setError('Mejlet kunde inte skickas. Kontrollera adressen och försök igen om en stund.'); }
+              setSent(true); setEmailCode(''); setEmailCooldown(Date.now() + 60_000); setNow(Date.now());
+            } catch (cause) { setError(authErrorMessage(cause, 'send')); setEmailCooldown(Date.now() + 60_000); setNow(Date.now()); }
             finally { setBusy(false); }
           }}>
             <label htmlFor="login-email">Mejladress</label>
-            <input id="login-email" type="email" autoComplete="email" required value={email} onChange={event => setEmail(event.target.value)} placeholder="din@mejl.se" />
-            <button className="auth-primary" disabled={busy || !email.trim() || !supabase || emailCooldown > now}><Mail aria-hidden="true" />{busy ? 'Skickar…' : emailCooldown > now ? `Ny länk om ${Math.ceil((emailCooldown - now) / 1000)} s` : sent ? 'Skicka ny inloggningslänk' : 'Skicka inloggningslänk'}</button>
+            <input id="login-email" type="email" autoComplete="email" required value={email} onChange={event => { setEmail(event.target.value); setEmailCode(''); }} placeholder="din@mejl.se" readOnly={busy} />
+            <button className="auth-primary" disabled={busy || !email.trim() || !supabase || emailCooldown > now}><Mail aria-hidden="true" />{busy ? 'Vänta…' : emailCooldown > now ? `Vänta ${Math.ceil((emailCooldown - now) / 1000)} s före nytt utskick` : sent ? 'Skicka ny kod' : 'Skicka inloggningskod'}</button>
           </form>
-          {sent && <p role="status">Kontrollera din mejl och öppna länken i samma webbläsare på den här enheten. Kolla även skräpposten.</p>}
+          {sent && <p role="status">En engångskod har skickats. Läs mejlet och ange koden här. Kontrollera även skräpposten.</p>}
+          <form className="auth-email-form auth-code-form" onSubmit={async event => {
+            event.preventDefault();
+            if (!supabase || busy || !email.trim() || !/^\d{6}$/.test(emailCode)) return;
+            setBusy(true); setError(''); setMessage('');
+            try {
+              sessionStorage.setItem('inventory-auth-return', route.pathname + route.search);
+              const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: emailCode, type: 'email' });
+              if (error) throw error;
+              setEmailCode('');
+            } catch (cause) { setError(authErrorMessage(cause, 'verify')); }
+            finally { setBusy(false); }
+          }}>
+            <label htmlFor="login-code">Engångskod från mejlet</label>
+            <input id="login-code" className="auth-code-input" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6}
+              value={emailCode} onChange={event => setEmailCode(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="6 siffror" readOnly={busy} required aria-describedby="login-code-help" />
+            <p id="login-code-help">Har du redan en kod kan du ange den direkt. Din fyrsiffriga pinkod används efter inloggningen.</p>
+            <button className="auth-primary" disabled={busy || !email.trim() || emailCode.length !== 6 || !supabase}>{busy ? 'Vänta…' : 'Logga in'}</button>
+          </form>
         </> : allowed ? <>
           <LockKeyhole className="auth-lock-icon" aria-hidden="true" />
           <h1 ref={lockHeading} tabIndex={-1}>{setup ? firstPin ? 'Bekräfta din kod' : 'Välj din pinkod' : 'Lås upp ditt hem'}</h1>

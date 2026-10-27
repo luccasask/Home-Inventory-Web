@@ -267,7 +267,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .authenticated-app { height: 100dvh; }
 .authenticated-app[hidden] { display: none; }
 .auth-shell { min-height: 0; }
-.auth-panel { align-items: center; justify-content: center; padding: 24px; overflow-y: auto; text-align: center; gap: 12px; }
+.auth-panel { align-items: center; justify-content: flex-start; padding: 24px; overflow-y: auto; text-align: center; gap: 12px; }
+.auth-panel > * { flex-shrink: 0; }
+.auth-panel > .auth-house { margin-top: auto; }
+.auth-panel > :last-child { margin-bottom: auto; }
 .auth-house { width: 58px; height: 58px; color: var(--terra); flex-shrink: 0; }
 .auth-panel h1 { font-size: clamp(27px, 7vw, 36px); font-weight: 900; margin: 4px 0; line-height: 1.15; }
 .auth-panel h1:focus { outline: none; }
@@ -278,6 +281,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .auth-email-form label { font-size: 20px; font-weight: 900; }
 .auth-email-form input { width: 100%; padding: 16px; border: 3px solid var(--terra); border-radius: 20px; color: var(--navy); background: var(--cream); font: inherit; font-size: 18px; }
 .auth-email-form input:focus { outline: none; box-shadow: 0 0 0 3px #e97c5b22; }
+.auth-code-form { margin-top: 0; }
+.auth-email-form .auth-code-input { letter-spacing: .25em; font-variant-numeric: tabular-nums; }
 .auth-primary { display: flex; align-items: center; justify-content: center; gap: 12px; background: var(--teal); color: var(--cream); font: inherit; font-size: 18px; font-weight: 900; padding: 16px; border: 0; border-radius: 20px; }
 .auth-primary:disabled { opacity: .6; }
 .auth-text-button { color: var(--navy); background: none; border: 0; padding: 10px; text-decoration: underline; text-underline-offset: 4px; font-size: 14px; }
