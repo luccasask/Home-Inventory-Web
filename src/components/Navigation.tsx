@@ -53,12 +53,12 @@ export function SearchToolbar({ viewMode, onViewChange }: { viewMode: ViewMode; 
   </nav>;
 }
 
-export function BottomNavigation() {
+export function BottomNavigation({ lastHomePath }: { lastHomePath: string }) {
   const location = useLocation();
   const panel = location.pathname === '/search' ? 'search' : isAddPath(location.pathname) ? 'add' : 'home';
   return (
     <nav className="bottom-navigation" data-panel={panel} aria-label="Huvudnavigation">
-      <Link className="home-link" to="/" state={{ direction: 'back', navigation: 'panel' }} aria-label="Mitt hem" aria-current={location.pathname !== '/search' && !isAddPath(location.pathname) ? 'page' : undefined}><House /></Link>
+      <Link className="home-link" to={panel === 'home' ? '/' : lastHomePath} state={{ direction: 'back', navigation: 'panel' }} aria-label="Mitt hem" aria-current={panel === 'home' ? 'page' : undefined}><House /></Link>
       <Link to="/search" state={{ navigation: 'panel' }} aria-label="Sök" aria-current={location.pathname === '/search' ? 'page' : undefined}><Search /></Link>
       <Link to="/add" state={{ navigation: 'panel' }} aria-label="Lägg till föremål" aria-current={isAddPath(location.pathname) ? 'page' : undefined}><PackagePlus /></Link>
       <span className="navigation-indicator" aria-hidden="true" />

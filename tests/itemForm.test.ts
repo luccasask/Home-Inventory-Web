@@ -38,3 +38,27 @@ test('invalid parents and whitespace-only names do not mark a draft complete', (
   assert.equal(draftIsComplete({ ...draftFor(object), place: 'missing' }, choices), false);
   assert.equal(draftIsComplete({ ...draftFor(object), name: '   ' }, choices), false);
 });
+
+test('contextual add prefills the current location or storage without copying its other fields', () => {
+  for (const parent of [root, box]) {
+    const draft = draftFor(undefined, parent);
+    const choices = placementChoices(items, undefined, parent);
+    assert.deepEqual(draft, { name: '', type: 'OBJECT', place: parent.id, description: '' });
+    assert.equal(draftIsComplete({ ...draft, name: 'Nytt föremål' }, choices), true);
+    assert.equal(choices.some(choice => choice.value === otherBox.id), false);
+  }
+  assert.equal(placementChoices(items, undefined, box).find(choice => choice.value === box.id)?.label, 'Hem → Låda');
+});
+
+test('adding from Mitt hem selects the root while a normal Add remains unplaced', () => {
+  const rootChoices = placementChoices(items, undefined, null);
+  assert.deepEqual(rootChoices[0], { value: '', label: 'Mitt hem' });
+  assert.equal(draftIsComplete({ ...draftFor(undefined, null), name: 'Ny plats' }, rootChoices), true);
+  assert.equal(draftIsComplete({ ...draftFor(), name: 'Nytt föremål' }, placementChoices(items)), false);
+});
+
+test('edit placement wins over an add context and unavailable contextual storage is not offered', () => {
+  assert.equal(draftFor(object, otherBox).place, box.id);
+  assert.equal(placementChoices(items, object, otherBox).some(choice => choice.value === otherBox.id), false);
+  assert.equal(placementChoices([root], undefined, box).some(choice => choice.value === box.id), false);
+});

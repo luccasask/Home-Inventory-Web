@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { House, PackagePlus, Plus } from 'lucide-react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { ancestorsOf, childrenOf, routeFor, type InventoryItem } from './domain/inventory';
@@ -23,6 +23,7 @@ export default function App() {
   const isAdd = isAddPath(location.pathname);
   const editId = location.pathname.startsWith('/add/') ? location.pathname.slice('/add/'.length) : null;
   const [addReady, setAddReady] = useState(false);
+  const [lastHomePath, setLastHomePath] = useState('/');
   const [items, setItems] = useState<readonly InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
@@ -99,9 +100,16 @@ export default function App() {
   const segments = location.pathname.split('/').filter(Boolean);
   const current = items.find(item => item.publicId === segments[1] && routeFor(item) === location.pathname);
   const editingItem = editId ? items.find(item => item.publicId === editId) : undefined;
+  const initialParentId = isAdd && !editId ? new URLSearchParams(location.search).get('parent') : null;
+  const initialParent = initialParentId === 'home' ? null
+    : items.find(item => item.publicId === initialParentId && item.type !== 'OBJECT');
+  useLayoutEffect(() => {
+    if (location.pathname === '/' || current) setLastHomePath(location.pathname);
+  }, [location.pathname, current?.id]);
   const swipeHandlers = useSwipeNavigation(location.key, direction => {
     const target = swipeTarget(location.pathname, items, direction);
-    if (target) navigate(target.path, { state: target.panel ? { navigation: 'panel' } : { direction: 'back' } });
+    if (target) navigate(target.panel && target.path === '/' ? lastHomePath : target.path,
+      { state: target.panel ? { navigation: 'panel' } : { direction: 'back' } });
   });
   const isHome = location.pathname === '/';
   const missing = !isHome && !current;
@@ -120,7 +128,7 @@ export default function App() {
         <PageTransition path={location.pathname} back={location.state?.direction === 'back'}
           viaPanelMenu={navigationType !== 'POP' && location.state?.navigation === 'panel'} swipeHandlers={swipeHandlers}>{active => isAdd
           ? <AddPage items={items} loading={loading} error={error} active={active} onRetry={() => void refresh()} onReadyChange={setAddReady}
-              editing={Boolean(editId)} item={editingItem} />
+              editing={Boolean(editId)} item={editingItem} initialParent={initialParent} />
           : isSearch
           ? <SearchPage items={items} loading={loading} error={error} viewMode={viewMode} active={active}
               search={location.search} transition={viewTransition} onRetry={() => void refresh()}
@@ -152,7 +160,7 @@ export default function App() {
             : <>
               <div className={`inventory-list inventory-list--${viewMode}`} aria-label={`Innehåll i ${title}`}>
                 {children.map(item => <InventoryCard key={item.id} item={item} items={items} />)}
-                {current?.type !== 'OBJECT' && <Link className="add-card" to="/add" aria-label="Lägg till föremål" title="Lägg till föremål">{viewMode === 'grid' ? <><span>Lägg till…</span><span className="card-icon-wrap"><PackagePlus aria-hidden="true" /></span></> : <Plus aria-hidden="true" />}</Link>}
+                {current?.type !== 'OBJECT' && <Link className="add-card" to={`/add?parent=${current?.publicId ?? 'home'}`} aria-label="Lägg till föremål" title="Lägg till föremål">{viewMode === 'grid' ? <><span>Lägg till…</span><span className="card-icon-wrap"><PackagePlus aria-hidden="true" /></span></> : <Plus aria-hidden="true" />}</Link>}
               </div>
               {current?.description && <p className="item-description">{current.description}</p>}
               {children.length === 0 && current?.type !== 'OBJECT' && <p className="demo-empty">{isHome ? 'Ditt inventarium är tomt.' : 'Förvaringen är tom.'}</p>}
@@ -164,7 +172,7 @@ export default function App() {
           : <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={requestedView} onViewChange={changeView} onCopy={() => void copyLink()}
               editRoute={current ? `/add/${current.publicId}` : undefined} />}
       </main>
-      <BottomNavigation />
+      <BottomNavigation lastHomePath={lastHomePath} />
       <span className="sr-only">{loading ? 'Ansluter till Supabase…' : error ? 'Supabase · Ingen anslutning' : 'Supabase · Endast läsning'}</span>
       <span role="status" className="sr-only">{status}</span>
     </div>

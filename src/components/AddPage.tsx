@@ -18,32 +18,33 @@ function limitWords(text: string) {
 }
 
 /** Local visual draft only. This component has no persistence or write service. */
-export function AddPage({ items, loading, error, active, onRetry, onReadyChange, editing = false, item }: {
+export function AddPage({ items, loading, error, active, onRetry, onReadyChange, editing = false, item, initialParent }: {
   items: readonly InventoryItem[]; loading: boolean; error: string; active: boolean; onRetry: () => void;
   onReadyChange: (ready: boolean) => void;
-  editing?: boolean; item?: InventoryItem;
+  editing?: boolean; item?: InventoryItem; initialParent?: InventoryItem | null;
 }) {
   const id = useId();
-  const [draft, setDraft] = useState(() => draftFor(item));
+  const [draft, setDraft] = useState(() => draftFor(item, initialParent));
   const { name, type, place, description } = draft;
   const heading = useRef<HTMLHeadingElement>(null);
   const form = useRef<HTMLFormElement>(null);
   const wasActive = useRef(active);
-  const initializedItem = useRef(item?.id);
+  const draftKey = item?.id ?? (initialParent === null ? 'home' : initialParent?.id);
+  const initializedItem = useRef(draftKey);
   useLayoutEffect(() => {
     if (active) {
       // A quick return can reuse the departing page during its slide. Reset the
       // draft before painting it again, while keeping the exit animation intact.
-      if (!wasActive.current || initializedItem.current !== item?.id) {
-        setDraft(draftFor(item));
+      if (!wasActive.current || initializedItem.current !== draftKey) {
+        setDraft(draftFor(item, initialParent));
       }
       form.current?.scrollTo(0, 0);
       heading.current?.focus({ preventScroll: true });
     }
     wasActive.current = active;
-    initializedItem.current = item?.id;
-  }, [active, item?.id]);
-  const places = useMemo(() => placementChoices(items, item), [items, item]);
+    initializedItem.current = draftKey;
+  }, [active, draftKey]);
+  const places = useMemo(() => placementChoices(items, item, initialParent), [items, item, initialParent]);
   useLayoutEffect(() => {
     onReadyChange(active && (!editing || Boolean(item)) && draftIsComplete(draft, places));
   }, [active, editing, item, draft, places, onReadyChange]);

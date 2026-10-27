@@ -1,5 +1,14 @@
 # Home browsing verification
 
+## Contextual Add, search focus and Home return — 27 October 2026
+
+- Browse Add tiles carry the current record's public ID in the add URL. The local draft selects that location/storage, including its full path; Mitt hem selects root. Main-menu Add remains blank. Editing still takes its placement from the edited record.
+- The Add context offers only existing locations plus its actual contextual storage, not unrelated containers. Three added tests cover new-context fields, root placement, edit precedence and unavailable storage; all 32 tests pass.
+- Empty search moves to the top and reveals its orange rule on input focus. Results remain hidden until a nonempty query; the field stays raised during that visit. Returning to an empty Search starts in its lower position again.
+- Home remembers the last valid browsing route during the current app session. From Search/Add it returns there; while browsing, another Home press goes to root. Search's right swipe uses the same remembered destination; item-parent and editor-return swipes remain unchanged.
+- Browser checks: list Add from Kök, grid Add from Köksskåp, empty main-menu Add, discarded draft on leaving, Home return from Add/Search followed by root reset, root Add, empty-search focus (form top 419→32px, rule opacity 0→1, no results), no console errors.
+- TypeScript, production build and whitespace checks pass. Saving/deleting remain disabled; no database services changed.
+
 ## House outline and panel corners — 27 October 2026
 
 - Removed custom fill/door-stroke overrides from the bottom-menu House icon, preserving its standard Lucide outline.
