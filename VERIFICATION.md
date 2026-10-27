@@ -1,5 +1,13 @@
 # Home browsing verification
 
+## Clickable hierarchy and selected icons — 27 October 2026
+
+- Item headers now expose a labelled breadcrumb navigation with Mitt hem and every ancestor linked to its actual route. Current item is marked aria-current; ancestor links use the existing backward slide.
+- Selected Package/Box search filters have a solid navy fill without inverted interior strokes. Filter URL updates and toggling remain unchanged.
+- The selected main-menu SVG rises 6px, with a 200ms transform transition; link hit areas and sliding underline stay fixed. Reduced motion disables this transition.
+- Browser checks: Kastrull → Lägenhet, breadcrumb → Mitt hem, Kastrull → Kök, search filter changes and live results, filled Package appearance, active/inactive icon transforms, no overflow at 320px and no console errors.
+- All 29 existing tests, TypeScript, production build and whitespace checks pass. Database and swipe logic are unchanged.
+
 ## Navigation indicator and search polish — 27 October 2026
 
 - Removed the header refresh control and its styles; automatic initial loading and error retry remain intact.

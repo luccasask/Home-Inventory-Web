@@ -5,6 +5,7 @@ import { ancestorsOf, childrenOf, routeFor, type InventoryItem } from './domain/
 import { loadInventory } from './services/inventoryRepository';
 import { InventoryCard } from './components/InventoryCard';
 import { InventoryIcon } from './components/InventoryIcon';
+import { InventoryBreadcrumbs } from './components/InventoryBreadcrumbs';
 import { BottomNavigation, ContextToolbar, SearchToolbar, type ViewMode } from './components/Navigation';
 import { FitText } from './components/FitText';
 import { PageTransition } from './components/PageTransition';
@@ -110,9 +111,6 @@ export default function App() {
   const parentRoute = parent ? routeFor(parent) : '/';
   const title = isAdd ? editId ? 'Redigera föremål' : 'Lägg till föremål' : isSearch ? 'Sök' : missing && !loading && !error ? 'Hittades inte' : current?.name ?? 'Mitt hem';
   const count = children.length;
-  const pathNames = [...ancestors.map(item => item.name), current?.name].filter(Boolean);
-  if (current?.parentId === null) pathNames.unshift('Mitt hem');
-  const summary = isHome ? `Hem | ${count} förvaringar` : `${pathNames.join(' → ')} | ${current?.type === 'OBJECT' ? 'Föremål' : `${count} förvaringar`}`;
 
   useEffect(() => { document.title = `${title} · Heminventering`; }, [title]);
 
@@ -133,7 +131,9 @@ export default function App() {
           : <>
         <header className="inventory-header">
           <h1 ref={active ? heading : null} tabIndex={-1}>{current ? <InventoryIcon name={current.icon} /> : <House aria-hidden="true" />}<FitText>{title}</FitText></h1>
-          {!missing && <p className="hierarchy-summary">{loading && items.length === 0 ? 'Hämtar ditt inventarium…' : error ? 'Anslutningen kunde inte slutföras' : summary}</p>}
+          {!missing && (current && !error
+            ? <InventoryBreadcrumbs current={current} ancestors={ancestors} count={count} />
+            : <p className="hierarchy-summary">{loading && items.length === 0 ? 'Hämtar ditt inventarium…' : error ? 'Anslutningen kunde inte slutföras' : `Hem | ${count} förvaringar`}</p>)}
           <div className="header-rule" />
         </header>
 
