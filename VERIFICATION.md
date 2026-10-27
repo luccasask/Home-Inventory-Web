@@ -1,5 +1,13 @@
 # Home browsing verification
 
+## Edit visual preview — 27 October 2026
+
+- Nineteen domain tests pass, including prefilled draft values, source immutability, string IDs, actual storage parents, root placement, cycle-safe placement choices, and edit-panel navigation.
+- Browser checks: pencil control opens the current item; all four fields match the source; Save and Delete remain disabled; changing a draft and leaving does not change the source; reopening restores original values.
+- Normal Add remains blank with no delete control. Root-level locations retain Mitt hem; objects inside storage retain that storage. Direct edit reload and unavailable-item recovery were checked.
+- Narrow-screen check at 320 × 640 has no horizontal overflow. The editor remains part of the Add menu section.
+- Database and authentication services are unchanged; the user explicitly chose the visual preview only.
+
 ## Main-panel direction and toolbar sizing — 27 October 2026
 
 - Thirteen tests pass, including all six main-panel directions and regressions for search-result, parent, and browser-history navigation.

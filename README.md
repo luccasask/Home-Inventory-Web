@@ -81,6 +81,12 @@ Fields are name (up to 120 characters), type (location/storage/object), an exist
 
 The Save button is gray until a nonblank name, a valid type, and an existing location are selected; it then turns teal as a visual readiness cue. It remains disabled in this preview and never writes data.
 
+## Edit preview
+
+The pencil-folder control on an item's browsing page opens `#/add/<public-id>` in the same Add panel, with name, type, actual parent placement, and description prefilled. Edit mode adds a gray, disabled delete control below the description. Save and Delete remain disabled; no write privileges, authentication changes, or database mutation calls are introduced.
+
+Leaving the editor discards its local changes. Returning starts from the original inventory record again; opening normal Add starts empty and hides Delete. Existing storage parents and root-level placement (`Mitt hem`) are preserved. New placement choices exclude the edited location itself and its descendants. Invalid edit links display an unavailable-item state instead of a blank creation form.
+
 ## Panel navigation
 
 Main-menu clicks follow the visual order Home → Search → Add. Selecting a panel to the left moves the outgoing page to the right and brings the selected page in from the left; selecting a panel to the right reverses this. Opening items (including search results), parent links, and browser Back/Forward retain their separate direction rules. Transitions remain 200ms without delaying navigation.

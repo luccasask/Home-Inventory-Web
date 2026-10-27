@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pageDirection } from '../src/domain/navigation.ts';
+import { isAddPath, pageDirection } from '../src/domain/navigation.ts';
 
 test('all six main-panel changes follow menu order rather than growing history indices', () => {
   const panels = ['/', '/search', '/add'];
@@ -23,4 +23,10 @@ test('parent navigation and browser Back/Forward preserve their directions', () 
 test('going to Home from inside an inventory branch keeps the parent direction', () => {
   assert.equal(pageDirection({ from: '/item/example', to: '/', viaPanelMenu: true,
     back: true, previousIndex: 5, nextIndex: 6 }), 'back');
+});
+test('editing is part of the Add panel and slides left to Search', () => {
+  assert.equal(isAddPath('/add/item-public-id'), true);
+  assert.equal(isAddPath('/item/item-public-id'), false);
+  assert.equal(pageDirection({ from: '/add/item-public-id', to: '/search', viaPanelMenu: true,
+    back: false, previousIndex: 5, nextIndex: 6 }), 'back');
 });

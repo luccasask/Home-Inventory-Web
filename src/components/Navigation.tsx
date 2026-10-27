@@ -2,6 +2,7 @@ import type { MouseEvent } from 'react';
 import { Box, ChevronLeft, Copy, FolderPen, House, LayoutGrid, MapPin, Package, PackagePlus, Rows2, Search } from 'lucide-react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { bounce } from './motion';
+import { isAddPath } from '../domain/navigation';
 
 export type ViewMode = 'list' | 'grid';
 
@@ -13,15 +14,17 @@ function toolbarFeedback(event: MouseEvent<HTMLElement>) {
   if (icon) bounce(icon);
 }
 
-export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, onCopy }: {
+export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, onCopy, editRoute }: {
   parentRoute: string; atHome: boolean; viewMode: ViewMode;
   onViewChange: (mode: ViewMode) => void; onCopy: () => void;
+  editRoute?: string;
 }) {
   return (
     <nav className="context-toolbar" aria-label="Åtgärder för aktuell vy" onClickCapture={toolbarFeedback}>
       <Link to={atHome ? '/' : parentRoute} state={{ direction: 'back' }} aria-disabled={atHome} tabIndex={atHome ? -1 : 0} aria-label="Gå till överordnad förvaring" title="Gå upp en nivå" className={atHome ? 'is-disabled' : ''}><ChevronLeft /></Link>
       <button type="button" onClick={onCopy} aria-label="Kopiera sidans länk" title="Kopiera sidans länk"><Copy /></button>
-      <button type="button" disabled aria-label="Redigera — ingår inte i denna förhandsvisning" title="Redigering ingår inte i denna förhandsvisning"><FolderPen /></button>
+      {editRoute ? <Link to={editRoute} aria-label="Redigera föremål" title="Redigera föremål"><FolderPen /></Link>
+        : <button type="button" disabled aria-label="Redigera föremål" title="Öppna ett föremål eller en plats för att redigera"><FolderPen /></button>}
       <button type="button" onClick={() => onViewChange('grid')} aria-pressed={viewMode === 'grid'} aria-label="Visa som grid" title="Visa som grid"><LayoutGrid /></button>
       <button type="button" onClick={() => onViewChange('list')} aria-pressed={viewMode === 'list'} aria-label="Visa som lista" title="Visa som lista"><Rows2 /></button>
     </nav>
@@ -54,9 +57,9 @@ export function BottomNavigation() {
   const location = useLocation();
   return (
     <nav className="bottom-navigation" aria-label="Huvudnavigation">
-      <Link className="home-link" to="/" state={{ direction: 'back', navigation: 'panel' }} aria-label="Mitt hem" aria-current={!['/search', '/add'].includes(location.pathname) ? 'page' : undefined}><House /></Link>
+      <Link className="home-link" to="/" state={{ direction: 'back', navigation: 'panel' }} aria-label="Mitt hem" aria-current={location.pathname !== '/search' && !isAddPath(location.pathname) ? 'page' : undefined}><House /></Link>
       <Link to="/search" state={{ navigation: 'panel' }} aria-label="Sök" aria-current={location.pathname === '/search' ? 'page' : undefined}><Search /></Link>
-      <Link to="/add" state={{ navigation: 'panel' }} aria-label="Lägg till föremål" aria-current={location.pathname === '/add' ? 'page' : undefined}><PackagePlus /></Link>
+      <Link to="/add" state={{ navigation: 'panel' }} aria-label="Lägg till föremål" aria-current={isAddPath(location.pathname) ? 'page' : undefined}><PackagePlus /></Link>
     </nav>
   );
 }

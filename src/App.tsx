@@ -10,12 +10,14 @@ import { FitText } from './components/FitText';
 import { PageTransition } from './components/PageTransition';
 import { SearchPage } from './components/SearchPage';
 import { AddPage, AddSavePanel } from './components/AddPage';
+import { isAddPath } from './domain/navigation';
 
 export default function App() {
   const location = useLocation();
   const navigationType = useNavigationType();
   const isSearch = location.pathname === '/search';
-  const isAdd = location.pathname === '/add';
+  const isAdd = isAddPath(location.pathname);
+  const editId = location.pathname.startsWith('/add/') ? location.pathname.slice('/add/'.length) : null;
   const [addReady, setAddReady] = useState(false);
   const [items, setItems] = useState<readonly InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,13 +94,14 @@ export default function App() {
 
   const segments = location.pathname.split('/').filter(Boolean);
   const current = items.find(item => item.publicId === segments[1] && routeFor(item) === location.pathname);
+  const editingItem = editId ? items.find(item => item.publicId === editId) : undefined;
   const isHome = location.pathname === '/';
   const missing = !isHome && !current;
   const children = childrenOf(items, current?.id ?? null);
   const ancestors = current ? ancestorsOf(items, current) : [];
   const parent = ancestors.at(-1);
   const parentRoute = parent ? routeFor(parent) : '/';
-  const title = isAdd ? 'Lägg till föremål' : isSearch ? 'Sök' : missing && !loading && !error ? 'Hittades inte' : current?.name ?? 'Mitt hem';
+  const title = isAdd ? editId ? 'Redigera föremål' : 'Lägg till föremål' : isSearch ? 'Sök' : missing && !loading && !error ? 'Hittades inte' : current?.name ?? 'Mitt hem';
   const count = children.length;
   const pathNames = [...ancestors.map(item => item.name), current?.name].filter(Boolean);
   if (current?.parentId === null) pathNames.unshift('Mitt hem');
@@ -111,7 +114,8 @@ export default function App() {
       <main className={`inventory-panel inventory-panel--${viewMode}`} id="main-content">
         <PageTransition path={location.pathname} back={location.state?.direction === 'back'}
           viaPanelMenu={navigationType !== 'POP' && location.state?.navigation === 'panel'}>{active => isAdd
-          ? <AddPage items={items} loading={loading} error={error} active={active} onRetry={() => void refresh()} onReadyChange={setAddReady} />
+          ? <AddPage items={items} loading={loading} error={error} active={active} onRetry={() => void refresh()} onReadyChange={setAddReady}
+              editing={Boolean(editId)} item={editingItem} />
           : isSearch
           ? <SearchPage items={items} loading={loading} error={error} viewMode={viewMode} active={active}
               search={location.search} transition={viewTransition} onRetry={() => void refresh()}
@@ -151,7 +155,8 @@ export default function App() {
 
         </>}</PageTransition>
         {isAdd ? <AddSavePanel ready={addReady} /> : isSearch ? <SearchToolbar viewMode={requestedView} onViewChange={changeView} />
-          : <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={requestedView} onViewChange={changeView} onCopy={() => void copyLink()} />}
+          : <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={requestedView} onViewChange={changeView} onCopy={() => void copyLink()}
+              editRoute={current ? `/add/${current.publicId}` : undefined} />}
       </main>
       <BottomNavigation />
       <span className="sr-only">{loading ? 'Ansluter till Supabase…' : error ? 'Supabase · Ingen anslutning' : 'Supabase · Endast läsning'}</span>

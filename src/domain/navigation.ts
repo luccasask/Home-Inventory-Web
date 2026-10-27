@@ -1,5 +1,9 @@
+export function isAddPath(path: string): boolean {
+  return path === '/add' || path.startsWith('/add/');
+}
+
 function panelOrder(path: string): number {
-  return path === '/search' ? 1 : path === '/add' ? 2 : 0;
+  return path === '/search' ? 1 : isAddPath(path) ? 2 : 0;
 }
 
 export function pageDirection({ from, to, viaPanelMenu, back, previousIndex, nextIndex }: {

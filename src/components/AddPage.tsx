@@ -1,6 +1,8 @@
 import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Box, ChevronDown, MapPin, Package, PackagePlus, Save } from 'lucide-react';
-import { ancestorsOf, type InventoryItem, type ItemType } from '../domain/inventory';
+import { Box, ChevronDown, MapPin, Package, PackagePlus, Save, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import type { InventoryItem, ItemType } from '../domain/inventory';
+import { draftFor, draftIsComplete, placementChoices } from '../domain/itemForm';
 import { FitText } from './FitText';
 
 const MAX_WORDS = 200;
@@ -16,56 +18,57 @@ function limitWords(text: string) {
 }
 
 /** Local visual draft only. This component has no persistence or write service. */
-export function AddPage({ items, loading, error, active, onRetry, onReadyChange }: {
+export function AddPage({ items, loading, error, active, onRetry, onReadyChange, editing = false, item }: {
   items: readonly InventoryItem[]; loading: boolean; error: string; active: boolean; onRetry: () => void;
   onReadyChange: (ready: boolean) => void;
+  editing?: boolean; item?: InventoryItem;
 }) {
   const id = useId();
-  const [name, setName] = useState('');
-  const [type, setType] = useState<ItemType>('OBJECT');
-  const [place, setPlace] = useState('');
-  const [description, setDescription] = useState('');
+  const [draft, setDraft] = useState(() => draftFor(item));
+  const { name, type, place, description } = draft;
   const heading = useRef<HTMLHeadingElement>(null);
   const form = useRef<HTMLFormElement>(null);
   const wasActive = useRef(active);
+  const initializedItem = useRef(item?.id);
   useLayoutEffect(() => {
     if (active) {
       // A quick return can reuse the departing page during its slide. Reset the
       // draft before painting it again, while keeping the exit animation intact.
-      if (!wasActive.current) {
-        setName(''); setType('OBJECT'); setPlace(''); setDescription('');
+      if (!wasActive.current || initializedItem.current !== item?.id) {
+        setDraft(draftFor(item));
       }
       form.current?.scrollTo(0, 0);
       heading.current?.focus({ preventScroll: true });
     }
     wasActive.current = active;
-  }, [active]);
-  const places = useMemo(() => items.filter(item => item.type === 'LOCATION').map(item => ({
-    id: item.id, label: [...ancestorsOf(items, item).map(parent => parent.name), item.name].join(' → '),
-  })).sort((a, b) => a.label.localeCompare(b.label, 'sv')), [items]);
+    initializedItem.current = item?.id;
+  }, [active, item?.id]);
+  const places = useMemo(() => placementChoices(items, item), [items, item]);
   useLayoutEffect(() => {
-    onReadyChange(active && Boolean(name.trim()) && ['LOCATION', 'STORAGE', 'OBJECT'].includes(type)
-      && places.some(option => option.id === place));
-  }, [active, name, type, place, places, onReadyChange]);
+    onReadyChange(active && (!editing || Boolean(item)) && draftIsComplete(draft, places));
+  }, [active, editing, item, draft, places, onReadyChange]);
   const TypeIcon = type === 'LOCATION' ? MapPin : type === 'STORAGE' ? Package : Box;
 
-  return <section className="add-page" aria-label="Lägg till föremål">
+  return <section className="add-page" aria-label={editing ? 'Redigera föremål' : 'Lägg till föremål'}>
     <header className="inventory-header add-header">
       <h1 ref={active ? heading : null} tabIndex={-1}><PackagePlus aria-hidden="true" /><FitText>Lägg till föremål</FitText></h1>
       <p className="hierarchy-summary">Namn | Typ | Plats | Beskrivning</p>
       <div className="header-rule" />
     </header>
-    <form ref={active ? form : null} className="inventory-content add-fields" aria-label="Uppgifter om föremålet" onSubmit={event => event.preventDefault()}>
+    {editing && !item ? <div className="empty-state" role={loading ? 'status' : 'alert'}>
+      <p>{loading ? 'Hämtar föremålet…' : error || 'Föremålet saknas eller är inte tillgängligt.'}</p>
+      {error ? <button type="button" onClick={onRetry}>Försök igen</button> : !loading && <Link to="/">Till Mitt hem</Link>}
+    </div> : <form ref={active ? form : null} className="inventory-content add-fields" aria-label={editing ? 'Redigera föremålets uppgifter' : 'Uppgifter om föremålet'} onSubmit={event => event.preventDefault()}>
       <div className="add-field">
         <label htmlFor={`${id}-name`}>Namn:</label>
-        <input id={`${id}-name`} value={name} onChange={event => setName(event.target.value)}
+        <input id={`${id}-name`} value={name} onChange={event => setDraft(current => ({ ...current, name: event.target.value }))}
           placeholder="Namn på föremålet" maxLength={120} autoComplete="off" />
       </div>
       <div className="add-field">
         <label htmlFor={`${id}-type`}>Typ:</label>
         <div className="add-select">
           <TypeIcon aria-hidden="true" />
-          <select id={`${id}-type`} value={type} onChange={event => setType(event.target.value as ItemType)}>
+          <select id={`${id}-type`} value={type} onChange={event => setDraft(current => ({ ...current, type: event.target.value as ItemType }))}>
             <option value="LOCATION">Plats</option><option value="STORAGE">Förvaring</option><option value="OBJECT">Föremål</option>
           </select>
           <ChevronDown className="select-chevron" aria-hidden="true" />
@@ -75,10 +78,10 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange 
         <label htmlFor={`${id}-place`}>Plats:</label>
         <div className="add-select">
           <MapPin aria-hidden="true" />
-          <select id={`${id}-place`} value={place} onChange={event => setPlace(event.target.value)} disabled={loading || !places.length}
+          <select id={`${id}-place`} value={place} onChange={event => setDraft(current => ({ ...current, place: event.target.value }))} disabled={loading || !places.length}
             aria-describedby={error ? `${id}-place-error` : undefined}>
-            <option value="">{loading ? 'Hämtar platser…' : places.length ? 'Välj befintlig plats' : 'Inga platser tillgängliga'}</option>
-            {places.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
+            {!places.some(option => option.value === '') && <option value="">{loading ? 'Hämtar platser…' : places.length ? 'Välj befintlig plats' : 'Inga platser tillgängliga'}</option>}
+            {places.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
           <ChevronDown className="select-chevron" aria-hidden="true" />
         </div>
@@ -86,12 +89,15 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange 
       </div>
       <div className="add-field">
         <label htmlFor={`${id}-description`}>Beskrivning:</label>
-        <textarea id={`${id}-description`} value={description} onChange={event => setDescription(limitWords(event.target.value))}
+        <textarea id={`${id}-description`} value={description} onChange={event => setDraft(current => ({ ...current, description: limitWords(event.target.value) }))}
           placeholder="Beskriv föremålet…" rows={5} aria-describedby={`${id}-word-limit`} />
         <p id={`${id}-word-limit`} className="add-field-note word-count">{wordCount(description)} / {MAX_WORDS} ord</p>
       </div>
-      <p className="add-field-note">Sparande är inte aktiverat ännu.</p>
-    </form>
+      {editing && <button className="delete-item-button" type="button" disabled title="Borttagning är inte aktiverad ännu" aria-describedby={`${id}-preview-note`}>
+        <Trash2 aria-hidden="true" /><span>Ta bort föremål</span>
+      </button>}
+      <p id={`${id}-preview-note`} className="add-field-note">{editing ? 'Sparande och borttagning är inte aktiverat ännu.' : 'Sparande är inte aktiverat ännu.'}</p>
+    </form>}
   </section>;
 }
 
