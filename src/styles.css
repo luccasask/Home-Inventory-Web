@@ -22,7 +22,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .app-shell { height: 100dvh; min-height: 560px; display: flex; flex-direction: column; padding-top: max(env(safe-area-inset-top), 8px); padding-bottom: env(safe-area-inset-bottom); position: relative; }
 .inventory-panel { background: var(--cream); border-radius: 22px; display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 0 14px 13px; }
 .inventory-page { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.page-transition { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); flex: 1; min-height: 0; overflow: hidden; }
+.page-transition { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); flex: 1; min-height: 0; overflow: clip; }
 .page-transition > .inventory-page { grid-area: 1 / 1; min-width: 0; background: var(--cream); }
 .page-transition--forward { --page-enter-x: 100%; --page-exit-x: -100%; }
 .page-transition--back { --page-enter-x: -100%; --page-exit-x: 100%; }

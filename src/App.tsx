@@ -70,7 +70,9 @@ export default function App() {
   useEffect(() => {
     list.current?.scrollTo(0, 0);
     if (firstRender.current) firstRender.current = false;
-    else heading.current?.focus();
+    // The incoming heading starts outside the viewport during a slide. Focus it
+    // for accessibility without scrolling the animation container to reveal it.
+    else heading.current?.focus({ preventScroll: true });
   }, [location.pathname]);
 
   const segments = location.pathname.split('/').filter(Boolean);
