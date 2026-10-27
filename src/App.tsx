@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { House, PackagePlus, Plus, RefreshCcw } from 'lucide-react';
+import { House, PackagePlus, Plus } from 'lucide-react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { ancestorsOf, childrenOf, routeFor, type InventoryItem } from './domain/inventory';
 import { loadInventory } from './services/inventoryRepository';
@@ -132,7 +132,6 @@ export default function App() {
               }} />
           : <>
         <header className="inventory-header">
-          <button className={`refresh-button ${loading ? 'is-loading' : ''}`} onClick={() => void refresh()} disabled={loading} aria-label="Uppdatera innehållet" title="Uppdatera"><RefreshCcw /></button>
           <h1 ref={active ? heading : null} tabIndex={-1}>{current ? <InventoryIcon name={current.icon} /> : <House aria-hidden="true" />}<FitText>{title}</FitText></h1>
           {!missing && <p className="hierarchy-summary">{loading && items.length === 0 ? 'Hämtar ditt inventarium…' : error ? 'Anslutningen kunde inte slutföras' : summary}</p>}
           <div className="header-rule" />

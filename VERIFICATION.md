@@ -1,5 +1,13 @@
 # Home browsing verification
 
+## Navigation indicator and search polish — 27 October 2026
+
+- Removed the header refresh control and its styles; automatic initial loading and error retry remain intact.
+- One persistent bottom-menu indicator slides between the three equal menu columns in 200ms. Item routes select Home; edit routes select Add. Reduced-motion preference disables the slide.
+- Empty search field sits 22px below the white panel's midpoint at 320 × 640 and 430 × 932, and 16.5px below at 1024 × 900. Placeholder uses bundled Nunito Sans 400; entered query text retains its existing weight. Results still move the field to the top.
+- Browser checks: live results, grid/list switching, opening a result, opening the prefilled editor, panel changes, indicator alignment at all three widths, no horizontal overflow or console errors.
+- All 29 existing tests, TypeScript, production build and whitespace checks pass. Swipe logic and database services are unchanged.
+
 ## Touch swipe navigation — 27 October 2026
 
 - All 29 domain tests pass; TypeScript and production build pass. Ten gesture tests cover panel order, actual parents independent of history, editor return routes, distance thresholds, diagonal/vertical rejection, cancellation, pointer identity and click suppression intent.
