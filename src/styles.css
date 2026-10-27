@@ -24,6 +24,16 @@ a { color: inherit; text-decoration: none; }
 button svg, a svg { flex-shrink: 0; stroke-width: 2; }
 button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-offset: 5px; }
 .app-shell { height: 100dvh; min-height: 560px; display: flex; flex-direction: column; padding-top: max(env(safe-area-inset-top), 8px); padding-bottom: env(safe-area-inset-bottom); position: relative; }
+.app-pull-surface { display: flex; flex-direction: column; flex: 1; min-height: 0; transition: transform 180ms ease-out; }
+.app-pull-surface--dragging { transition: none; }
+.has-pull-refresh, .has-pull-refresh body { overscroll-behavior-y: none; }
+.has-pull-refresh .inventory-content { overscroll-behavior-y: none; }
+.has-pull-refresh .app-shell { overflow: clip; }
+.pull-refresh-indicator { position: absolute; top: max(env(safe-area-inset-top), 8px); left: 50%; transform: translateX(-50%); height: 48px; display: flex; align-items: center; justify-content: center; gap: 9px; color: var(--cream); font-size: 14px; white-space: nowrap; pointer-events: none; }
+.pull-refresh-indicator svg { width: 20px; height: 20px; transition: transform 160ms ease; }
+.pull-refresh-indicator--loading svg { animation: pull-refresh-spin 700ms linear infinite; }
+@keyframes pull-refresh-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .app-pull-surface, .pull-refresh-indicator svg { transition: none; } .pull-refresh-indicator--loading svg { animation: none; } }
 .inventory-panel { background: var(--cream); border-radius: 22px; overflow: clip; display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 0 14px 13px; }
 .inventory-page { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .page-transition { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); flex: 1; min-height: 0; overflow: clip; touch-action: pan-y pinch-zoom; }
@@ -199,8 +209,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .search-type-filters > button { width: 33.333%; }
 .search-view-controls > button { width: 50%; }
 .search-toolbar [aria-pressed="true"] svg { fill: var(--navy); stroke: var(--navy); }
-.search-type-filters [aria-pressed="true"] svg path ~ path { fill: none; stroke: var(--navy); }
-.search-type-filters [aria-pressed="true"] svg .package-tape-marker { stroke: var(--cream); stroke-width: 2.2; }
 .search-type-filters [aria-pressed="true"] svg circle { fill: var(--cream); stroke: var(--cream); }
 @media (max-width: 374px) {
   .search-toolbar button { padding: 5px; }

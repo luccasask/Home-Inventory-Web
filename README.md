@@ -84,6 +84,14 @@ Ranking prioritizes exact names, name prefixes, partial names, all query words i
 
 The three type buttons select locations, storage, or objects. Select the active filter again to show all types. Type and view controls share one outlined toolbar, and selected icons are filled. List/grid selection is shared with browsing and saved locally. The query and optional type filter are kept in the hash URL (`#/search?q=kastrull&type=OBJECT`) using replacement while typing, so reload and browser Back restore the search without a history entry for every character.
 
+Selected storage/object filters use custom filled SVG faces with open cream seams. Storage has two top faces separated by an open tape stripe; unselected icons keep their Lucide outlines.
+
+## Pull to refresh in installed apps
+
+In standalone/home-screen mode, a single-finger downward drag of at least 150px from the top of browsing/search content moves the whole UI with resistance. Releasing beyond the threshold reloads the page so both inventory data and the current deployed JavaScript are fetched. Short pulls settle back without reloading. The normal browser version retains native behavior. The existing persistent sign-in remains saved; full reload returns to the local PIN lock as usual.
+
+The gesture is disabled in Add/Edit, with dialogs, form controls, an active keyboard, pinch zoom, scrolled-down content, loading and view transitions. Horizontal intent is left to the existing swipe navigation. Navigation, hiding the page or a second finger cancels a pending pull. A dragged card cannot accidentally open on release. Gesture classification and eligibility have automated tests; physical iPhone standalone touch handling still requires device testing.
+
 ## Add and edit items
 
 The rightmost bottom-navigation icon and the add tile open `#/add`. Save becomes enabled when name, type and placement are valid. Drafts stay in component memory and are reset when leaving and returning, including quick navigation during a page slide. Drafts are not stored in local storage or the URL. Locking and unlocking preserves an active draft; background refresh retains its original revision to prevent silently overwriting external changes.

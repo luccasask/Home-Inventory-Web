@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Check, House, LockKeyhole, PackagePlus, Plus } from 'lucide-react';
+import { ArrowDown, Check, House, LockKeyhole, PackagePlus, Plus, RotateCw } from 'lucide-react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { ancestorsOf, childrenOf, contentLabel, routeFor, type InventoryItem } from './domain/inventory';
 import { loadInventory } from './services/inventoryRepository';
@@ -16,6 +16,7 @@ import { swipeTarget } from './domain/swipe';
 import { useSwipeNavigation } from './components/useSwipeNavigation';
 import { useControlFeedback } from './components/useControlFeedback';
 import { useSafariEdgeSwipe } from './components/useSafariEdgeSwipe';
+import { usePullToRefresh } from './components/usePullToRefresh';
 import type { SwipeDirection } from './domain/swipe';
 
 export default function App() {
@@ -145,6 +146,7 @@ export default function App() {
       { state: target.panel ? { navigation: 'panel' } : { direction: 'back' } });
   };
   const swipeHandlers = useSwipeNavigation(location.key, handleSwipe);
+  const pull = usePullToRefresh(mainPanel, location.key, !isAdd && !loading && viewTransition === 'idle');
   useSafariEdgeSwipe(mainPanel, location.key, handleSwipe, () => {
     if (isSearch) mainPanel.current?.querySelector<HTMLInputElement>('.inventory-page:not([aria-hidden="true"]) .search-form input')?.focus({ preventScroll: true });
   });
@@ -161,6 +163,13 @@ export default function App() {
 
   return (
     <div className="app-shell" {...controlFeedback}>
+      <div className={`pull-refresh-indicator${pull.refreshing ? ' pull-refresh-indicator--loading' : ''}`} role="status" aria-hidden={pull.distance === 0}
+        style={{ opacity: Math.min(1, pull.distance / 40) }}>
+        {pull.refreshing ? <RotateCw aria-hidden="true" /> : <ArrowDown aria-hidden="true" style={{ transform: pull.ready ? 'rotate(180deg)' : undefined }} />}
+        <span>{pull.refreshing ? 'Uppdaterar…' : pull.ready ? 'Släpp för att uppdatera' : 'Dra ned för att uppdatera'}</span>
+      </div>
+      <div className={`app-pull-surface${pull.claimed ? ' app-pull-surface--dragging' : ''}`} inert={pull.refreshing}
+        style={pull.distance ? { transform: `translateY(${pull.distance}px)` } : undefined}>
       <button type="button" className="app-lock-button" aria-label="Lås appen" title="Lås appen" onClick={() => window.dispatchEvent(new Event('inventory-lock'))}><LockKeyhole aria-hidden="true" /></button>
       <main ref={mainPanel} className={`inventory-panel inventory-panel--${viewMode}`} id="main-content" onClick={event => {
         if (!isSearch || event.defaultPrevented || !(event.target instanceof Element)
@@ -234,6 +243,7 @@ export default function App() {
       </div>}
       <span className="sr-only">{loading ? 'Ansluter till Supabase…' : error ? 'Supabase · Ingen anslutning' : 'Supabase · Inloggad'}</span>
       <span role="status" className="sr-only">{status}</span>
+      </div>
     </div>
   );
 }
