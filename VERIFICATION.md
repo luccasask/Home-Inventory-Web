@@ -1,5 +1,11 @@
 # Home browsing verification
 
+## House outline and panel corners — 27 October 2026
+
+- Removed custom fill/door-stroke overrides from the bottom-menu House icon, preserving its standard Lucide outline.
+- The rounded inventory panel now clips child backgrounds to its own border radius, removing the square white protrusion along the top corners.
+- Visual check at 430px confirms the smooth upper edge; computed House fill is none with both paths cream. At 320 × 640, Add form still scrolls (scrollTop 291), no horizontal overflow or console errors. TypeScript, production build and whitespace checks pass.
+
 ## Clickable hierarchy and selected icons — 27 October 2026
 
 - Item headers now expose a labelled breadcrumb navigation with Mitt hem and every ancestor linked to its actual route. Current item is marked aria-current; ancestor links use the existing backward slide.
