@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Search, X } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import type { InventoryItem, ItemType } from '../domain/inventory';
@@ -18,31 +18,30 @@ export function SearchPage({ items, loading, error, viewMode, active, onRetry, s
   const submitted = Boolean(query.trim());
   const rawType = params.get('type');
   const type = ['LOCATION', 'STORAGE', 'OBJECT'].includes(rawType ?? '') ? rawType as ItemType : null;
-  const [draft, setDraft] = useState(query);
   const input = useRef<HTMLInputElement>(null);
   const resultArea = useRef<HTMLDivElement>(null);
   const results = useMemo(() => searchInventory(items, query, type), [items, query, type]);
-  useEffect(() => { setDraft(query); }, [query]);
   useEffect(() => { if (active) resultArea.current?.scrollTo(0, 0); }, [query, type, active]);
   const summary = `Din sökning ”${query}” gav ${results.length} resultat`;
+  const updateQuery = (value: string) => {
+    const next = new URLSearchParams(params);
+    // Keep spaces and the caret intact while typing; ranking normalizes the query.
+    if (value) next.set('q', value.slice(0, 120)); else next.delete('q');
+    setParams(next, { replace: true });
+  };
 
   return <section className={`search-page${submitted ? ' search-page--results' : ''}`} aria-label="Sök i inventariet">
     <h1 className="sr-only">Sök i inventariet</h1>
     <header className="search-header">
       <form className="search-form" role="search" onSubmit={event => {
         event.preventDefault();
-        const next = new URLSearchParams(params);
-        const value = draft.trim().slice(0, 120);
-        if (value) next.set('q', value); else next.delete('q');
-        setParams(next, { replace: true });
         input.current?.blur();
       }}>
         <button className="search-submit" type="submit" aria-label="Sök" title="Sök"><Search aria-hidden="true" /></button>
-        <input ref={active ? input : null} type="search" value={draft} onChange={event => setDraft(event.target.value)}
+        <input ref={active ? input : null} type="search" value={query} onChange={event => updateQuery(event.target.value)}
           placeholder="Sök…" aria-label="Sök efter föremål, förvaring eller plats" maxLength={120} enterKeyHint="search" autoComplete="off" />
-        {draft && <button className="search-clear" type="button" aria-label="Rensa sökningen" onClick={() => {
-          setDraft('');
-          const next = new URLSearchParams(params); next.delete('q'); setParams(next, { replace: true });
+        {query && <button className="search-clear" type="button" aria-label="Rensa sökningen" onClick={() => {
+          updateQuery('');
           input.current?.focus({ preventScroll: true });
         }}><X aria-hidden="true" /></button>}
       </form>

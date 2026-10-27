@@ -183,29 +183,26 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .search-header .header-rule { opacity: 0; margin-inline: 14px; transition: opacity 160ms ease; }
 .search-page--results .search-summary, .search-page--results .header-rule { opacity: 1; }
 .search-results { margin-top: 170px; }
-.search-results .inventory-list { animation: search-results-reveal 140ms 180ms ease-out both; }
-@keyframes search-results-reveal { from { opacity: 0; } to { opacity: 1; } }
 .search-empty { grid-column: 1 / -1; margin: 20px 16px; color: #656464; text-align: center; line-height: 1.5; }
-.search-toolbar { display: flex; gap: 10px; margin-top: 12px; flex-shrink: 0; }
-.search-toolbar .context-toolbar { margin-top: 0; min-width: 0; }
+.search-toolbar { gap: 0; width: 100%; }
+.search-type-filters, .search-view-controls { display: flex; align-items: center; justify-content: space-around; min-width: 0; }
 .search-type-filters { flex: 3; }
-.search-view-controls { flex: 1.8; }
+.search-view-controls { flex: 2; }
+.search-toolbar button { color: var(--navy); border: 0; background: none; padding: 7px; max-width: 70px; height: 68px; display: flex; align-items: center; justify-content: center; }
 .search-type-filters > button { width: 33.333%; }
 .search-view-controls > button { width: 50%; }
-.search-type-filters > [aria-pressed="true"] { color: var(--terra); background: rgb(233 124 91 / 10%); border-radius: 14px; }
-.search-type-filters > [aria-pressed="true"] svg { fill: none; stroke: var(--terra); }
+.search-toolbar [aria-pressed="true"] svg { fill: var(--navy); stroke: var(--navy); }
+.search-type-filters [aria-pressed="true"] svg path ~ path { fill: none; stroke: var(--cream); }
+.search-type-filters [aria-pressed="true"] svg circle { fill: var(--cream); stroke: var(--cream); }
 @media (max-width: 374px) {
-  .search-toolbar { gap: 8px; }
-  .search-toolbar .context-toolbar { border-radius: 22px; }
-  .search-toolbar .context-toolbar > button { padding: 5px; }
+  .search-toolbar button { padding: 5px; }
   .search-form { padding-inline: 12px; gap: 5px; }
   .search-form input { font-size: 27px; }
 }
 @media (min-width: 700px) {
   .search-header { left: 70px; right: 70px; }
-  .search-toolbar { max-width: 600px; width: 100%; align-self: center; margin-top: 18px; gap: 14px; }
+  .search-toolbar { max-width: 600px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .search-header, .search-summary, .search-header .header-rule, .search-form .search-submit { transition: none; }
-  .search-results .inventory-list { animation: none; }
 }

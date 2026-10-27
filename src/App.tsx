@@ -31,6 +31,14 @@ export default function App() {
     if (viewTransition === 'idle' && requestedView !== viewMode) setViewTransition('out');
   }, [requestedView, viewMode, viewTransition]);
   useEffect(() => {
+    // Clearing a live query hides the results and cancels their animation events.
+    // Finish any view change immediately, so the next query cannot stay invisible.
+    if (isSearch && !new URLSearchParams(location.search).get('q')?.trim()) {
+      setViewMode(requestedView);
+      setViewTransition('idle');
+    }
+  }, [isSearch, location.search, requestedView, viewTransition]);
+  useEffect(() => {
     try { localStorage.setItem('inventory-view', viewMode); } catch { /* The view still works without storage. */ }
   }, [viewMode]);
   useEffect(() => {

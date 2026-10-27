@@ -67,8 +67,8 @@ Tags and tag-derived icons are not loaded in this version, as requested. Known m
 
 ## Search
 
-Open the search icon in the bottom navigation. Submit with Enter, the mobile keyboard's search action, or the search button. The centered field moves to the top and results appear below it. Results search all loaded items, independently of their parents; opening a result uses the item's existing stable URL.
+Open the search icon in the bottom navigation. The first nonblank character moves the centered field to the top; results update immediately while typing. Enter, the mobile keyboard's search action, and the search button dismiss the keyboard without being required for searching. Clearing the query returns the field to the center. Results search all loaded items, independently of their parents; opening a result uses the item's existing stable URL.
 
 Ranking prioritizes exact names, name prefixes, partial names, all query words in the name, descriptions, ancestor placement, and finally small spelling mistakes in names. Swedish letters remain distinct. Tags, synonyms, and hypernyms are not searched: the public web role has no access to that data and no new database access is granted.
 
-The three type buttons select locations, storage, or objects. Select the active filter again to show all types. List/grid selection is shared with browsing and saved locally. The query and optional type filter are kept in the hash URL (`#/search?q=kastrull&type=OBJECT`) so reload and browser Back restore the search.
+The three type buttons select locations, storage, or objects. Select the active filter again to show all types. Type and view controls share one outlined toolbar, and selected icons are filled. List/grid selection is shared with browsing and saved locally. The query and optional type filter are kept in the hash URL (`#/search?q=kastrull&type=OBJECT`) using replacement while typing, so reload and browser Back restore the search without a history entry for every character.

@@ -2,6 +2,8 @@
 
 ## Search addition — 27 October 2026
 
+- Live-search revision: results appear from the first character without submit; verified multiword typing and clearing during a grid/list transition. Removed the initial result-reveal delay. Unified the toolbar frame and inverted selected type icons.
+
 - Nine domain tests pass, including ranking, cross-parent results, type filters, spelling mistakes, Swedish letters, and empty queries.
 - Browser checks cover centered search, submit, ranked results, all three filters, list/grid switching, empty states, clear, opening a result, browser Back, and URL reload persistence.
 - Responsive checks at 430 × 932, 320 × 640, and desktop; no horizontal overflow.

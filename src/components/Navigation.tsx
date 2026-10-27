@@ -31,8 +31,8 @@ export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, on
 export function SearchToolbar({ viewMode, onViewChange }: { viewMode: ViewMode; onViewChange: (mode: ViewMode) => void }) {
   const [params, setParams] = useSearchParams();
   const selected = params.get('type');
-  return <nav className="search-toolbar" aria-label="Filtrera sökresultat och välj vy" onClickCapture={toolbarFeedback}>
-    <div className="context-toolbar search-type-filters" role="group" aria-label="Typfilter">
+  return <nav className="context-toolbar search-toolbar" aria-label="Filtrera sökresultat och välj vy" onClickCapture={toolbarFeedback}>
+    <div className="search-type-filters" role="group" aria-label="Typfilter">
       {([{ type: 'LOCATION', label: 'Visa endast platser', Icon: MapPin },
         { type: 'STORAGE', label: 'Visa endast förvaringar', Icon: Package },
         { type: 'OBJECT', label: 'Visa endast föremål', Icon: Box }] as const).map(({ type, label, Icon }) =>
@@ -43,7 +43,7 @@ export function SearchToolbar({ viewMode, onViewChange }: { viewMode: ViewMode; 
             setParams(next, { replace: true });
           }}><Icon aria-hidden="true" /></button>)}
     </div>
-    <div className="context-toolbar search-view-controls" role="group" aria-label="Visningsläge">
+    <div className="search-view-controls" role="group" aria-label="Visningsläge">
       <button type="button" onClick={() => onViewChange('grid')} aria-pressed={viewMode === 'grid'} aria-label="Visa som grid" title="Visa som grid"><LayoutGrid /></button>
       <button type="button" onClick={() => onViewChange('list')} aria-pressed={viewMode === 'list'} aria-label="Visa som lista" title="Visa som lista"><Rows2 /></button>
     </div>
