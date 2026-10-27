@@ -21,7 +21,7 @@ button svg, a svg { flex-shrink: 0; stroke-width: 2; }
 button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-offset: 5px; }
 .app-shell { height: 100dvh; min-height: 560px; display: flex; flex-direction: column; padding-top: max(env(safe-area-inset-top), 8px); padding-bottom: env(safe-area-inset-bottom); position: relative; }
 .inventory-panel { background: var(--cream); border-radius: 22px; display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 0 14px 13px; }
-.inventory-page { display: flex; flex-direction: column; flex: 1; min-height: 0; animation: inventory-fade-in 160ms ease-out both; }
+.inventory-page { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .inventory-header { position: relative; padding: 31px 16px 23px; flex-shrink: 0; }
 .inventory-header h1 { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 0; min-height: 64px; font-size: clamp(34px, 11.6vw, 50px); font-weight: 900; letter-spacing: -.7px; line-height: 1.12; outline: none; padding: 5px 25px 0 0; }
 .inventory-header h1 > svg { width: 49px; height: 53px; flex-shrink: 0; }
@@ -41,7 +41,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 @keyframes inventory-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
   .view-transition--out, .view-transition--in { animation-duration: 1ms; }
-  .inventory-page { animation: none; }
 }
 .inventory-list { display: flex; flex-direction: column; gap: 14px; }
 .inventory-card, .add-card { display: flex; align-items: center; min-height: 99px; width: 100%; border: 4px solid; border-radius: 25px; background: transparent; flex-shrink: 0; }
