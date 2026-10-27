@@ -1,5 +1,14 @@
 # Home browsing verification
 
+## Add-item visual preview — 27 October 2026
+
+- Add form opens from bottom navigation and the browse add tile. Save is disabled and form submission is prevented; no database write service was added.
+- Verified name, type icon/selection, existing-location-only choices with full paths, and multiline description.
+- Pasting 205 words retains 200 and displays the correct counter; standalone list bullets do not count as words.
+- Leaving and returning immediately clears name, type, place, and description, including while the previous page is still sliding out.
+- Active-menu underline follows inventory, search, and add sections. Search still returns live results.
+- Responsive checks at 430 × 932, 320 × 640, and 1024 × 900: no horizontal overflow; short screens scroll the fields while the Save panel remains visible.
+
 ## Search addition — 27 October 2026
 
 - Live-search revision: results appear from the first character without submit; verified multiword typing and clearing during a grid/list transition. Removed the initial result-reveal delay. Unified the toolbar frame and inverted selected type icons.

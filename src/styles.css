@@ -72,6 +72,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .is-disabled { pointer-events: none; }
 .bottom-navigation { height: 80px; padding: 8px 33px; display: flex; align-items: center; justify-content: space-around; flex-shrink: 0; color: var(--cream); }
 .bottom-navigation > a, .bottom-navigation > button { display: flex; align-items: center; justify-content: center; width: 70px; height: 64px; color: inherit; background: none; border: 0; padding: 6px; }
+.bottom-navigation > a { position: relative; }
+.bottom-navigation > a[aria-current="page"]::after { content: ''; position: absolute; width: 100px; height: 4px; border-radius: 4px; background: var(--cream); left: 50%; bottom: -4px; transform: translateX(-50%); pointer-events: none; }
 .bottom-navigation svg { width: 51px; height: 55px; stroke-width: 2; }
 .home-link svg { fill: var(--cream); }
 .home-link svg path:last-child { stroke: var(--terra); }
@@ -205,4 +207,35 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 }
 @media (prefers-reduced-motion: reduce) {
   .search-header, .search-summary, .search-header .header-rule, .search-form .search-submit { transition: none; }
+}
+
+.add-page { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.add-header { padding: 24px 16px 18px; }
+.add-header h1 { min-height: 58px; padding-right: 0; font-size: clamp(24px, 7.5vw, 32px); gap: 12px; }
+.add-header .hierarchy-summary { margin: 9px 0 14px; }
+.add-fields { width: 100%; max-width: 600px; margin-inline: auto; padding: 0 26px 18px; }
+.add-field { margin-bottom: 14px; }
+.add-field label { display: block; margin: 0 4px 6px; font-size: 23px; font-weight: 900; line-height: 1.25; }
+.add-field input, .add-field select, .add-field textarea { display: block; width: 100%; min-width: 0; border: 4px solid var(--terra); border-radius: 20px; padding: 12px 20px; background: var(--cream); color: var(--terra); font: inherit; font-size: 24px; font-weight: 600; }
+.add-field input, .add-field select { height: 66px; }
+.add-field :is(input, textarea)::placeholder { color: var(--terra); opacity: .75; }
+.add-field :is(input, select, textarea):focus-visible { outline: 3px solid var(--navy); outline-offset: 3px; }
+.add-select { position: relative; }
+.add-select select { appearance: none; -webkit-appearance: none; padding-left: 46px; padding-right: 50px; text-overflow: ellipsis; }
+.add-select > svg { position: absolute; width: 26px; height: 28px; left: 18px; top: 19px; color: var(--terra); pointer-events: none; stroke-width: 1.6; }
+.add-select > .select-chevron { left: auto; right: 18px; width: 30px; stroke-width: 3; }
+.add-field textarea { font-size: 16px; min-height: 148px; line-height: 1.45; resize: vertical; }
+.add-field-note { margin: 6px 4px 0; color: #656464; font-size: 13px; line-height: 1.4; }
+.add-field-note button { border: 0; background: none; color: var(--navy); text-decoration: underline; }
+.word-count { text-align: right; }
+.add-save-panel { flex-shrink: 0; width: 100%; max-width: 600px; align-self: center; padding: 0 26px; margin-top: 12px; }
+.add-save-button { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; height: 83px; border: 4px solid var(--teal); border-radius: 25px; background: var(--cream); color: var(--teal); font-size: 42px; font-weight: 900; opacity: 1; }
+.add-save-button svg { width: 48px; height: 48px; }
+.add-save-note { margin: 6px 0 0; color: #656464; text-align: center; font-size: 12px; line-height: 1.3; }
+@media (max-width: 374px) {
+  .add-header { padding-inline: 6px; }
+  .add-fields, .add-save-panel { padding-inline: 14px; }
+  .add-field label { font-size: 21px; }
+  .add-field input, .add-field select { font-size: 21px; }
+  .bottom-navigation > a[aria-current="page"]::after { width: 80px; }
 }

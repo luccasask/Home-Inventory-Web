@@ -9,7 +9,7 @@ React + TypeScript + Vite home inventory browser, based on the three supplied Sw
 - Stable hash links and a missing-link state.
 - App manifest, standalone display, PNG icons, and Apple touch icon.
 - Search across the entire inventory, ranked results, type filters, and list/grid views.
-- Add, edit, and delete controls are intentionally disabled.
+- Visual add-item form with existing-place selection; saving, editing, and deleting are disabled.
 
 **Content is loaded directly from the existing Supabase PostgreSQL inventory.** The owner explicitly chose no sign-in and public read-only access. Names, descriptions, hierarchy, and contents of this inventory (including future records) are therefore publicly readable through its API. Other inventories, tags, access mappings, and write operations remain inaccessible to anonymous visitors. Refresh reads current database contents. Existing item IDs and public UUIDs are preserved; no inventory records were inserted, changed, or deleted.
 
@@ -72,3 +72,9 @@ Open the search icon in the bottom navigation. The first nonblank character move
 Ranking prioritizes exact names, name prefixes, partial names, all query words in the name, descriptions, ancestor placement, and finally small spelling mistakes in names. Swedish letters remain distinct. Tags, synonyms, and hypernyms are not searched: the public web role has no access to that data and no new database access is granted.
 
 The three type buttons select locations, storage, or objects. Select the active filter again to show all types. Type and view controls share one outlined toolbar, and selected icons are filled. List/grid selection is shared with browsing and saved locally. The query and optional type filter are kept in the hash URL (`#/search?q=kastrull&type=OBJECT`) using replacement while typing, so reload and browser Back restore the search without a history entry for every character.
+
+## Add-item preview
+
+The rightmost bottom-navigation icon and the add tile open `#/add`. This is a visual form only: the Save button is disabled, form submission is prevented, and no database write service is connected. Drafts stay in component memory and are reset when leaving and returning, including quick navigation during a page slide. Drafts are not stored in local storage or the URL.
+
+Fields are name (up to 120 characters), type (location/storage/object), an existing location, and description (up to 200 words, with a live counter and paste truncation). The location selector includes only existing `LOCATION` records and shows full paths to distinguish matching names. Tags are deferred. The bottom menu marks the current inventory, search, or add section with a light underline.

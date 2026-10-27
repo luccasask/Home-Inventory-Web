@@ -9,10 +9,12 @@ import { BottomNavigation, ContextToolbar, SearchToolbar, type ViewMode } from '
 import { FitText } from './components/FitText';
 import { PageTransition } from './components/PageTransition';
 import { SearchPage } from './components/SearchPage';
+import { AddPage, AddSavePanel } from './components/AddPage';
 
 export default function App() {
   const location = useLocation();
   const isSearch = location.pathname === '/search';
+  const isAdd = location.pathname === '/add';
   const [items, setItems] = useState<readonly InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
@@ -31,13 +33,13 @@ export default function App() {
     if (viewTransition === 'idle' && requestedView !== viewMode) setViewTransition('out');
   }, [requestedView, viewMode, viewTransition]);
   useEffect(() => {
-    // Clearing a live query hides the results and cancels their animation events.
-    // Finish any view change immediately, so the next query cannot stay invisible.
-    if (isSearch && !new URLSearchParams(location.search).get('q')?.trim()) {
+    // Panels without visible results cannot finish a grid/list animation.
+    // Settle it when entering the add form or clearing the live query.
+    if (isAdd || (isSearch && !new URLSearchParams(location.search).get('q')?.trim())) {
       setViewMode(requestedView);
       setViewTransition('idle');
     }
-  }, [isSearch, location.search, requestedView, viewTransition]);
+  }, [isAdd, isSearch, location.search, requestedView, viewTransition]);
   useEffect(() => {
     try { localStorage.setItem('inventory-view', viewMode); } catch { /* The view still works without storage. */ }
   }, [viewMode]);
@@ -94,7 +96,7 @@ export default function App() {
   const ancestors = current ? ancestorsOf(items, current) : [];
   const parent = ancestors.at(-1);
   const parentRoute = parent ? routeFor(parent) : '/';
-  const title = isSearch ? 'Sök' : missing && !loading && !error ? 'Hittades inte' : current?.name ?? 'Mitt hem';
+  const title = isAdd ? 'Lägg till föremål' : isSearch ? 'Sök' : missing && !loading && !error ? 'Hittades inte' : current?.name ?? 'Mitt hem';
   const count = children.length;
   const pathNames = [...ancestors.map(item => item.name), current?.name].filter(Boolean);
   if (current?.parentId === null) pathNames.unshift('Mitt hem');
@@ -105,7 +107,9 @@ export default function App() {
   return (
     <div className="app-shell">
       <main className={`inventory-panel inventory-panel--${viewMode}`} id="main-content">
-        <PageTransition path={location.pathname} back={location.state?.direction === 'back'}>{active => isSearch
+        <PageTransition path={location.pathname} back={location.state?.direction === 'back'}>{active => isAdd
+          ? <AddPage items={items} loading={loading} error={error} active={active} onRetry={() => void refresh()} />
+          : isSearch
           ? <SearchPage items={items} loading={loading} error={error} viewMode={viewMode} active={active}
               search={location.search} transition={viewTransition} onRetry={() => void refresh()}
               onTransitionEnd={() => {
@@ -135,7 +139,7 @@ export default function App() {
             : <>
               <div className={`inventory-list inventory-list--${viewMode}`} aria-label={`Innehåll i ${title}`}>
                 {children.map(item => <InventoryCard key={item.id} item={item} items={items} />)}
-                {current?.type !== 'OBJECT' && <button className="add-card" disabled title="Lägg till ingår inte i denna version" aria-label="Lägg till — ingår inte i denna version">{viewMode === 'grid' ? <><span>Lägg till…</span><span className="card-icon-wrap"><PackagePlus aria-hidden="true" /></span></> : <Plus aria-hidden="true" />}</button>}
+                {current?.type !== 'OBJECT' && <Link className="add-card" to="/add" aria-label="Lägg till föremål" title="Lägg till föremål">{viewMode === 'grid' ? <><span>Lägg till…</span><span className="card-icon-wrap"><PackagePlus aria-hidden="true" /></span></> : <Plus aria-hidden="true" />}</Link>}
               </div>
               {current?.description && <p className="item-description">{current.description}</p>}
               {children.length === 0 && current?.type !== 'OBJECT' && <p className="demo-empty">{isHome ? 'Ditt inventarium är tomt.' : 'Förvaringen är tom.'}</p>}
@@ -143,7 +147,7 @@ export default function App() {
         </div>
 
         </>}</PageTransition>
-        {isSearch ? <SearchToolbar viewMode={requestedView} onViewChange={changeView} />
+        {isAdd ? <AddSavePanel /> : isSearch ? <SearchToolbar viewMode={requestedView} onViewChange={changeView} />
           : <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={requestedView} onViewChange={changeView} onCopy={() => void copyLink()} />}
       </main>
       <BottomNavigation />
