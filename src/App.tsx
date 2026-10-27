@@ -109,9 +109,10 @@ export default function App() {
     if (location.pathname === '/' || current) setLastHomePath(location.pathname);
   }, [location.pathname, current?.id]);
   const swipeHandlers = useSwipeNavigation(location.key, direction => {
-    const target = swipeTarget(location.pathname, items, direction);
-    if (target) navigate(target.panel && target.path === '/' ? lastHomePath : target.path,
-      { state: target.panel ? { navigation: 'panel' } : { direction: 'back' } });
+    const target = swipeTarget(location.pathname, items, direction, window.history.state?.idx ?? 0);
+    if (!target) return;
+    if ('historyDelta' in target) navigate(target.historyDelta);
+    else navigate(target.path, { state: { navigation: 'panel' } });
   });
   const isHome = location.pathname === '/';
   const missing = !isHome && !current;
@@ -131,7 +132,7 @@ export default function App() {
           || event.target.closest('a, button, input, select, textarea, nav, dialog')) return;
         event.currentTarget.querySelector<HTMLInputElement>('.inventory-page:not([aria-hidden="true"]) .search-form input')?.focus({ preventScroll: true });
       }}>
-        <PageTransition path={location.pathname} back={location.state?.direction === 'back'}
+        <PageTransition path={location.pathname} back={navigationType !== 'POP' && location.state?.direction === 'back'}
           viaPanelMenu={navigationType !== 'POP' && location.state?.navigation === 'panel'} swipeHandlers={swipeHandlers}>{active => isAdd
           ? <AddPage items={items} loading={loading} error={error} active={active} onRetry={() => void refresh()} onReadyChange={setAddReady}
               editing={Boolean(editId)} item={editingItem} initialParent={initialParent} />
@@ -164,11 +165,12 @@ export default function App() {
             : loading && items.length === 0 ? <p className="empty-state">Hämtar innehåll…</p>
             : missing ? <div className="empty-state"><p>Platsen saknas eller är inte tillgänglig.</p><Link to="/">Till Mitt hem</Link></div>
             : <>
+              {viewMode === 'grid' && current?.description && <p className="item-description">{current.description}</p>}
               <div className={`inventory-list inventory-list--${viewMode}`} aria-label={`Innehåll i ${title}`}>
                 {children.map(item => <InventoryCard key={item.id} item={item} items={items} />)}
                 {current?.type !== 'OBJECT' && <Link className="add-card" to={`/add?parent=${current?.publicId ?? 'home'}`} aria-label="Lägg till föremål" title="Lägg till föremål">{viewMode === 'grid' ? <><span>Lägg till…</span><span className="card-icon-wrap"><PackagePlus aria-hidden="true" /></span></> : <Plus aria-hidden="true" />}</Link>}
               </div>
-              {current?.description && <p className="item-description">{current.description}</p>}
+              {viewMode === 'list' && current?.description && <p className="item-description">{current.description}</p>}
               {children.length === 0 && current?.type !== 'OBJECT' && <p className="demo-empty">{isHome ? 'Ditt inventarium är tomt.' : 'Förvaringen är tom.'}</p>}
             </>}
         </div>

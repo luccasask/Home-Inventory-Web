@@ -1,5 +1,13 @@
 # Home browsing verification
 
+## History-based right swipe and grid descriptions — 27 October 2026
+
+- Right swipe now requests a single history Back on all routes, instead of guessing the parent or neighboring panel. React Router's index guards direct entry, so no prior app entry means no navigation. Left swipe and explicit parent/breadcrumb links keep their existing destinations.
+- Search typing and filtering still replace the current URL; Back therefore restores the complete query/filter and results without stepping through individual keystrokes. POP animations derive direction from the history index, not an older route's stored direction flag.
+- Grid descriptions now precede the icons with a 20px gap. List descriptions retain their previous position below the cards.
+- All 32 tests pass; updated swipe cases cover history Back across every panel, no-history/invalid-index guards, loading/missing records and existing gesture detection. TypeScript, production build and whitespace checks pass.
+- Browser checks use the same history Back/Forward operation as the new swipe action: filtered `köksskåp` search → result → Back restores both results, query and filter; Forward slides correctly; hierarchy/breadcrumb visits unwind in actual visit order. Grid/list description order checked, no overflow at 320px and no console errors. Physical touch gestures were not re-exercised by the desktop test interface; gesture detection itself is unchanged.
+
 ## Fixed search and shared control feedback — 27 October 2026
 
 - Search field/rule are now visible at the top from first entry, with a permanently visible magnifier, `...` placeholder and default `sök efter föremål.` hint. Blank clicks anywhere in the search panel (including its padding) focus the input; links, buttons, filters and result cards retain their own behavior.

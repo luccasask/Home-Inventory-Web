@@ -1,22 +1,16 @@
 import { routeFor, type InventoryItem } from './inventory.ts';
 
 export type SwipeDirection = 'left' | 'right';
-export interface SwipeTarget { path: string; panel: boolean }
+export type SwipeTarget = { path: string; panel: boolean } | { historyDelta: -1 };
 
-export function swipeTarget(path: string, items: readonly InventoryItem[], direction: SwipeDirection): SwipeTarget | null {
-  if (path.startsWith('/add/')) {
-    const edited = items.find(item => item.publicId === path.slice('/add/'.length));
-    return direction === 'right' && edited ? { path: routeFor(edited), panel: false } : null;
-  }
-  if (path === '/add') return direction === 'right' ? { path: '/search', panel: true } : null;
-  if (path === '/search') return { path: direction === 'right' ? '/' : '/add', panel: true };
-  if (path === '/') return direction === 'left' ? { path: '/search', panel: true } : null;
-  const current = items.find(item => routeFor(item) === path);
-  if (!current) return null;
-  if (direction === 'left') return { path: '/search', panel: true };
-  if (current.parentId === null) return { path: '/', panel: false };
-  const parent = items.find(item => item.id === current.parentId);
-  return parent ? { path: routeFor(parent), panel: false } : null;
+export function swipeTarget(path: string, items: readonly InventoryItem[], direction: SwipeDirection, historyIndex = 0): SwipeTarget | null {
+  // React Router stores the app history index. Back restores the complete URL,
+  // including a search query/filter, without pushing another history entry.
+  if (direction === 'right') return Number.isSafeInteger(historyIndex) && historyIndex > 0 ? { historyDelta: -1 } : null;
+  if (path.startsWith('/add')) return null;
+  if (path === '/search') return { path: '/add', panel: true };
+  if (path === '/' || items.some(item => routeFor(item) === path)) return { path: '/search', panel: true };
+  return null;
 }
 
 export function swipeDirection(dx: number, dy: number, width: number): SwipeDirection | null {
