@@ -101,7 +101,7 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
         onClick={() => setDeleteOpen(true)} aria-haspopup="dialog" title="Ta bort föremål">
         <Trash2 aria-hidden="true" /><span>Ta bort föremål</span>
       </button>}
-      <p id={`${id}-preview-note`} className="add-field-note">{editing ? 'Sparande och borttagning är inte aktiverat ännu.' : 'Sparande är inte aktiverat ännu.'}</p>
+      <p id={`${id}-preview-note`} className="add-field-note">{editing ? 'Det går inte att spara eller radera ännu.' : 'Det går inte att spara ännu.'}</p>
     </form>}
     {active && editing && item && deleteOpen && <DeleteConfirmation onDismiss={() => setDeleteOpen(false)} />}
   </section>;
@@ -109,9 +109,9 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
 
 export function AddSavePanel({ ready }: { ready: boolean }) {
   return <div className="add-save-panel">
-    <button className={`context-toolbar add-save-button${ready ? ' add-save-button--ready' : ''}`} type="button" disabled aria-describedby="add-save-note" title="Sparande är inte aktiverat ännu">
+    <button className={`context-toolbar add-save-button${ready ? ' add-save-button--ready' : ''}`} type="button" disabled aria-describedby="add-save-note" title="Det går inte att spara ännu.">
       <Save aria-hidden="true" /><span>Spara</span>
     </button>
-    <span id="add-save-note" className="sr-only">Sparande är inte aktiverat ännu.</span>
+    <span id="add-save-note" className="sr-only">Det går inte att spara ännu.</span>
   </div>;
 }

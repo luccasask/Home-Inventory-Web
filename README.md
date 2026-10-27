@@ -10,7 +10,7 @@ React + TypeScript + Vite home inventory browser, based on the three supplied Sw
 - App manifest, standalone display, PNG icons, and Apple touch icon.
 - Search across the entire inventory, ranked results, type filters, and list/grid views.
 - Visual add/edit form with existing-place selection; database saving and deleting remain disabled.
-- Touch/pen swipes: right goes back one step in the app's browsing history, restoring search terms and filters; left moves to the next main panel. Direct entries without earlier app history stay in the app. Vertical scrolling and form controls retain native interactions.
+- Touch/pen swipes: right returns a directly opened search result to its original query and filter; other items go to their parent, editors return to the edited item, and main panels follow menu order. Left moves to the next main panel. Vertical scrolling and form controls retain native interactions.
 
 **Content is loaded directly from the existing Supabase PostgreSQL inventory.** The owner explicitly chose no sign-in and public read-only access. Names, descriptions, hierarchy, and contents of this inventory (including future records) are therefore publicly readable through its API. Other inventories, tags, access mappings, and write operations remain inaccessible to anonymous visitors. Refresh reads current database contents. Existing item IDs and public UUIDs are preserved; no inventory records were inserted, changed, or deleted.
 

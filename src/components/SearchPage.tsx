@@ -56,7 +56,7 @@ export function SearchPage({ items, loading, error, viewMode, active, onRetry, s
       {error ? <div className="empty-state" role="alert"><p>{error}</p><button onClick={onRetry}>Försök igen</button></div>
         : loading && !items.length ? <p className="empty-state">Hämtar innehåll…</p>
         : <div className={`inventory-list inventory-list--${viewMode}`} aria-label="Sökresultat">
-          {results.map(item => <InventoryCard key={item.id} item={item} items={items} />)}
+          {results.map(item => <InventoryCard key={item.id} item={item} items={items} searchReturn={`/search${search}`} />)}
           {!results.length && <p className="search-empty">Inga träffar. Prova ett annat sökord eller ändra typfiltret.</p>}
         </div>}
     </div>

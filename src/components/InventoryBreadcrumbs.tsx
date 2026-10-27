@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { routeFor, type InventoryItem } from '../domain/inventory';
 
-export function InventoryBreadcrumbs({ current, ancestors, count }: {
-  current: InventoryItem; ancestors: readonly InventoryItem[]; count: number;
+export function InventoryBreadcrumbs({ current, ancestors, contents }: {
+  current: InventoryItem; ancestors: readonly InventoryItem[]; contents: string;
 }) {
   return <nav className="hierarchy-summary" aria-label="Sökväg">
     <ol>
@@ -13,6 +13,6 @@ export function InventoryBreadcrumbs({ current, ancestors, count }: {
       </li>)}
       <li><span className="path-separator" aria-hidden="true"> → </span><span aria-current="page">{current.name}</span></li>
     </ol>
-    <span> | {current.type === 'OBJECT' ? 'Föremål' : `${count} förvaringar`}</span>
+    <span> | {current.type === 'OBJECT' ? 'Föremål' : contents}</span>
   </nav>;
 }

@@ -1,5 +1,15 @@
 # Home browsing verification
 
+## Scoped search return and UI consistency — 27 October 2026
+
+- Only Search result links carry their source search URL in route state. Right swipe on those records restores that exact query/filter. Ordinary child links do not inherit the origin: right swipe follows the real parent again. Editors and main panels restore their previous swipe destinations; Search → Home uses the existing remembered Home route.
+- Updated swipe tests cover search origins, ordinary parents, editors, panels and invalid origins. Two new inventory-label tests cover correct Swedish singular/plural and mixed-type counts. All 35 tests pass.
+- Removed the obsolete header space reserved for Refresh; icon/title groups are centered. Standardized mobile header top padding at 24px, text/rule spacing at 12–20px, list/form gaps at 16px, form label gaps at 8px, secondary copy at 14px and field labels at 24px (22px on narrow screens).
+- Form fields align with the header rule at x=30px on 430px screens and x=17px on 320px screens. Desktop forms retain a readable maximum width. All action panels remain 83px high (520px wide on desktop).
+- Content summaries distinguish places, storage and objects instead of calling all children storage. Fixed singular `1 förvaring`/`1 plats`, neutral empty-content copy, parent-link wording and clearer disabled Save/Delete notes. User-owned record names/descriptions are unchanged.
+- Visual/browser review covers Home list/grid, nested content and long breadcrumbs, Search filters/results, Add/Edit fields and scrolling, and the delete dialog at 320 × 640, 430 × 932 and 1024 × 900. No horizontal overflow or console errors. Header group center measured at 215px on 430px viewport; secondary text 14px and list gap 16px confirmed.
+- TypeScript, production build and whitespace checks pass. Gesture detection is unchanged; the revised destinations are unit-tested. No database writes were added.
+
 ## History-based right swipe and grid descriptions — 27 October 2026
 
 - Right swipe now requests a single history Back on all routes, instead of guessing the parent or neighboring panel. React Router's index guards direct entry, so no prior app entry means no navigation. Left swipe and explicit parent/breadcrumb links keep their existing destinations.

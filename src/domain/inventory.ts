@@ -15,6 +15,17 @@ export function childrenOf(items: readonly InventoryItem[], parentId: string | n
   return items.filter(item => item.parentId === parentId);
 }
 
+export function contentLabel(items: readonly InventoryItem[]): string {
+  const counts: Record<ItemType, number> = { LOCATION: 0, STORAGE: 0, OBJECT: 0 };
+  for (const item of items) counts[item.type]++;
+  const parts = [
+    counts.LOCATION ? `${counts.LOCATION} ${counts.LOCATION === 1 ? 'plats' : 'platser'}` : '',
+    counts.STORAGE ? `${counts.STORAGE} ${counts.STORAGE === 1 ? 'förvaring' : 'förvaringar'}` : '',
+    counts.OBJECT ? `${counts.OBJECT} föremål` : '',
+  ].filter(Boolean);
+  return parts.join(' · ') || '0 föremål';
+}
+
 export function ancestorsOf(items: readonly InventoryItem[], item: InventoryItem) {
   const ancestors: InventoryItem[] = [];
   const visited = new Set([item.id]);

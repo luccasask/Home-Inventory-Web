@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { House, PackagePlus, Plus } from 'lucide-react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
-import { ancestorsOf, childrenOf, routeFor, type InventoryItem } from './domain/inventory';
+import { ancestorsOf, childrenOf, contentLabel, routeFor, type InventoryItem } from './domain/inventory';
 import { loadInventory } from './services/inventoryRepository';
 import { InventoryCard } from './components/InventoryCard';
 import { InventoryIcon } from './components/InventoryIcon';
@@ -109,10 +109,10 @@ export default function App() {
     if (location.pathname === '/' || current) setLastHomePath(location.pathname);
   }, [location.pathname, current?.id]);
   const swipeHandlers = useSwipeNavigation(location.key, direction => {
-    const target = swipeTarget(location.pathname, items, direction, window.history.state?.idx ?? 0);
+    const target = swipeTarget(location.pathname, items, direction, location.state?.searchReturn);
     if (!target) return;
-    if ('historyDelta' in target) navigate(target.historyDelta);
-    else navigate(target.path, { state: { navigation: 'panel' } });
+    navigate(target.panel && target.path === '/' ? lastHomePath : target.path,
+      { state: target.panel ? { navigation: 'panel' } : { direction: 'back' } });
   });
   const isHome = location.pathname === '/';
   const missing = !isHome && !current;
@@ -121,7 +121,7 @@ export default function App() {
   const parent = ancestors.at(-1);
   const parentRoute = parent ? routeFor(parent) : '/';
   const title = isAdd ? editId ? 'Redigera föremål' : 'Lägg till föremål' : isSearch ? 'Sök' : missing && !loading && !error ? 'Hittades inte' : current?.name ?? 'Mitt hem';
-  const count = children.length;
+  const contents = contentLabel(children);
 
   useEffect(() => { document.title = `${title} · Heminventering`; }, [title]);
 
@@ -147,8 +147,8 @@ export default function App() {
         <header className="inventory-header">
           <h1 ref={active ? heading : null} tabIndex={-1}>{current ? <InventoryIcon name={current.icon} /> : <House aria-hidden="true" />}<FitText>{title}</FitText></h1>
           {!missing && (current && !error
-            ? <InventoryBreadcrumbs current={current} ancestors={ancestors} count={count} />
-            : <p className="hierarchy-summary">{loading && items.length === 0 ? 'Hämtar ditt inventarium…' : error ? 'Anslutningen kunde inte slutföras' : `Hem | ${count} förvaringar`}</p>)}
+            ? <InventoryBreadcrumbs current={current} ancestors={ancestors} contents={contents} />
+            : <p className="hierarchy-summary">{loading && items.length === 0 ? 'Hämtar ditt inventarium…' : error ? 'Anslutningen kunde inte slutföras' : `Mitt hem | ${contents}`}</p>)}
           <div className="header-rule" />
         </header>
 
@@ -171,7 +171,7 @@ export default function App() {
                 {current?.type !== 'OBJECT' && <Link className="add-card" to={`/add?parent=${current?.publicId ?? 'home'}`} aria-label="Lägg till föremål" title="Lägg till föremål">{viewMode === 'grid' ? <><span>Lägg till…</span><span className="card-icon-wrap"><PackagePlus aria-hidden="true" /></span></> : <Plus aria-hidden="true" />}</Link>}
               </div>
               {viewMode === 'list' && current?.description && <p className="item-description">{current.description}</p>}
-              {children.length === 0 && current?.type !== 'OBJECT' && <p className="demo-empty">{isHome ? 'Ditt inventarium är tomt.' : 'Förvaringen är tom.'}</p>}
+              {children.length === 0 && current?.type !== 'OBJECT' && <p className="demo-empty">{isHome ? 'Ditt inventarium är tomt.' : 'Här finns inget innehåll ännu.'}</p>}
             </>}
         </div>
 

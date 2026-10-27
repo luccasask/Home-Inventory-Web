@@ -14,22 +14,36 @@ test('left swipes retain forward panel navigation without wrapping', () => {
   assert.equal(swipeTarget('/add', items, 'left'), null);
   assert.deepEqual(swipeTarget('/item/item', items, 'left'), { path: '/search', panel: true });
 });
-test('right swipes pop history on every panel instead of guessing a parent or menu neighbor', () => {
-  for (const path of ['/', '/search', '/add', '/item/item', '/storage/box', '/location/place', '/add/item']) {
-    assert.deepEqual(swipeTarget(path, items, 'right', 3), { historyDelta: -1 });
-  }
+test('ordinary right swipes follow parents and the previous main panel', () => {
+  assert.deepEqual(swipeTarget('/item/item', items, 'right'), { path: '/storage/box', panel: false });
+  assert.deepEqual(swipeTarget('/storage/box', items, 'right'), { path: '/location/place', panel: false });
+  assert.deepEqual(swipeTarget('/location/place', items, 'right'), { path: '/', panel: false });
+  assert.deepEqual(swipeTarget('/search', items, 'right'), { path: '/', panel: true });
+  assert.deepEqual(swipeTarget('/add', items, 'right'), { path: '/search', panel: true });
+  assert.equal(swipeTarget('/', items, 'right'), null);
 });
-test('a direct entry with no app history cannot swipe outside the app', () => {
-  for (const path of ['/', '/search', '/add', '/item/item', '/storage/box', '/add/item']) {
-    assert.equal(swipeTarget(path, items, 'right'), null);
-    for (const index of [-1, NaN, Infinity, 1.5]) assert.equal(swipeTarget(path, items, 'right', index), null);
+test('only result entries return to their captured search, including its complete query and filter', () => {
+  const source = '/search?q=k%C3%B6k&type=STORAGE';
+  for (const path of ['/item/item', '/storage/box', '/location/place']) {
+    assert.deepEqual(swipeTarget(path, items, 'right', source), { path: source, panel: false });
   }
+  assert.deepEqual(swipeTarget('/item/item', items, 'left', source), { path: '/search', panel: true });
+  // A normal child entry has no origin and therefore follows its real parent.
+  assert.deepEqual(swipeTarget('/item/item', items, 'right'), { path: '/storage/box', panel: false });
 });
-test('back remains available while items load or a record is missing, without opening invalid forward routes', () => {
-  assert.deepEqual(swipeTarget('/item/missing', [], 'right', 1), { historyDelta: -1 });
-  assert.deepEqual(swipeTarget('/item/item', [item], 'right', 1), { historyDelta: -1 });
-  assert.equal(swipeTarget('/item/missing', items, 'left'), null);
+test('editors return to the edited record and unrelated panels ignore search origins', () => {
+  assert.deepEqual(swipeTarget('/add/item', items, 'right', '/search?q=sax'), { path: '/item/item', panel: false });
+  assert.deepEqual(swipeTarget('/add', items, 'right', '/search?q=sax'), { path: '/search', panel: true });
   assert.equal(swipeTarget('/add/item', items, 'left'), null);
+});
+
+test('invalid search origins and missing records cannot open unrelated destinations', () => {
+  for (const source of [undefined, null, 3, '//example.com', 'https://example.com', '/searching', '/search/other']) {
+    assert.deepEqual(swipeTarget('/item/item', items, 'right', source), { path: '/storage/box', panel: false });
+  }
+  assert.equal(swipeTarget('/item/missing', [], 'right', '/search?q=sax'), null);
+  assert.equal(swipeTarget('/item/item', [item], 'right'), null);
+  assert.equal(swipeTarget('/item/missing', items, 'left'), null);
 });
 test('taps, short drags and vertical or diagonal scrolling do not trigger swipes', () => {
   for (const [dx, dy] of [[0, 0], [25, 0], [100, 100], [20, 150]]) assert.equal(swipeDirection(dx, dy, 430), null);

@@ -30,6 +30,6 @@ export function DeleteConfirmation({ onDismiss }: { onDismiss: () => void }) {
       <button type="button" className="delete-confirmation-delete" disabled aria-describedby={`${id}-note`}>Radera</button>
       <button ref={cancel} type="button" className="delete-confirmation-cancel" onClick={onDismiss}>Avbryt</button>
     </div>
-    <p id={`${id}-note`} className="delete-confirmation-note">Radering är inte aktiverad ännu.</p>
+    <p id={`${id}-note`} className="delete-confirmation-note">Det går inte att radera ännu.</p>
   </dialog>;
 }
