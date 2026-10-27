@@ -1,11 +1,12 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type HTMLAttributes, type ReactNode } from 'react';
 import { pageDirection } from '../domain/navigation';
 
 type Page = { path: string; index: number; render: (active: boolean) => ReactNode };
 
 /** Keep the outgoing page visible while the new route slides in immediately. */
-export function PageTransition({ path, back, viaPanelMenu, children }: {
+export function PageTransition({ path, back, viaPanelMenu, children, swipeHandlers }: {
   path: string; back: boolean; viaPanelMenu: boolean; children: (active: boolean) => ReactNode;
+  swipeHandlers?: HTMLAttributes<HTMLDivElement>;
 }) {
   const index: number = window.history.state?.idx ?? 0;
   const lastPage = useRef<Page>({ path, index, render: children });
@@ -20,7 +21,7 @@ export function PageTransition({ path, back, viaPanelMenu, children }: {
   }
   useLayoutEffect(() => { lastPage.current = { path, index, render: children }; });
 
-  return <div className={`page-transition page-transition--${transition.direction}`}>
+  return <div className={`page-transition page-transition--${transition.direction}`} {...swipeHandlers}>
     {transition.previous && <div key={transition.previous.path}
       className="inventory-page page-slide--exit" inert aria-hidden="true">
       {transition.previous.render(false)}

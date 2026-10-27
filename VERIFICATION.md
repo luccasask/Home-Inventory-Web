@@ -1,5 +1,13 @@
 # Home browsing verification
 
+## Touch swipe navigation — 27 October 2026
+
+- All 29 domain tests pass; TypeScript and production build pass. Ten gesture tests cover panel order, actual parents independent of history, editor return routes, distance thresholds, diagonal/vertical rejection, cancellation, pointer identity and click suppression intent.
+- A clear horizontal touch/pen gesture navigates on release using the existing page slides. Mouse dragging is excluded. Horizontal drags suppress the subsequent card click; inputs, selects, buttons and editable controls are excluded. Vertical scrolling and pinch zoom remain native.
+- Browser regression checks: live search, opening a result, opening its prefilled editor, disabled Save/Delete, no horizontal overflow, no console errors. Computed touch action is pan-y pinch-zoom.
+- Physical touch behavior and gesture feel still need an iPhone/device check; the desktop browser test interface does not provide touch input.
+- No database or authentication changes.
+
 ## Edit visual preview — 27 October 2026
 
 - Nineteen domain tests pass, including prefilled draft values, source immutability, string IDs, actual storage parents, root placement, cycle-safe placement choices, and edit-panel navigation.

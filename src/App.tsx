@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { House, PackagePlus, Plus, RefreshCcw } from 'lucide-react';
-import { Link, useLocation, useNavigationType } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { ancestorsOf, childrenOf, routeFor, type InventoryItem } from './domain/inventory';
 import { loadInventory } from './services/inventoryRepository';
 import { InventoryCard } from './components/InventoryCard';
@@ -11,9 +11,12 @@ import { PageTransition } from './components/PageTransition';
 import { SearchPage } from './components/SearchPage';
 import { AddPage, AddSavePanel } from './components/AddPage';
 import { isAddPath } from './domain/navigation';
+import { swipeTarget } from './domain/swipe';
+import { useSwipeNavigation } from './components/useSwipeNavigation';
 
 export default function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   const navigationType = useNavigationType();
   const isSearch = location.pathname === '/search';
   const isAdd = isAddPath(location.pathname);
@@ -95,6 +98,10 @@ export default function App() {
   const segments = location.pathname.split('/').filter(Boolean);
   const current = items.find(item => item.publicId === segments[1] && routeFor(item) === location.pathname);
   const editingItem = editId ? items.find(item => item.publicId === editId) : undefined;
+  const swipeHandlers = useSwipeNavigation(location.key, direction => {
+    const target = swipeTarget(location.pathname, items, direction);
+    if (target) navigate(target.path, { state: target.panel ? { navigation: 'panel' } : { direction: 'back' } });
+  });
   const isHome = location.pathname === '/';
   const missing = !isHome && !current;
   const children = childrenOf(items, current?.id ?? null);
@@ -113,7 +120,7 @@ export default function App() {
     <div className="app-shell">
       <main className={`inventory-panel inventory-panel--${viewMode}`} id="main-content">
         <PageTransition path={location.pathname} back={location.state?.direction === 'back'}
-          viaPanelMenu={navigationType !== 'POP' && location.state?.navigation === 'panel'}>{active => isAdd
+          viaPanelMenu={navigationType !== 'POP' && location.state?.navigation === 'panel'} swipeHandlers={swipeHandlers}>{active => isAdd
           ? <AddPage items={items} loading={loading} error={error} active={active} onRetry={() => void refresh()} onReadyChange={setAddReady}
               editing={Boolean(editId)} item={editingItem} />
           : isSearch
