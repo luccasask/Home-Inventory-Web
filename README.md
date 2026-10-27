@@ -84,7 +84,13 @@ Ranking prioritizes exact names, name prefixes, partial names, all query words i
 
 The three type buttons select locations, storage, or objects. Select the active filter again to show all types. Type and view controls share one outlined toolbar, and selected icons are filled. List/grid selection is shared with browsing and saved locally. The query and optional type filter are kept in the hash URL (`#/search?q=kastrull&type=OBJECT`) using replacement while typing, so reload and browser Back restore the search without a history entry for every character.
 
-Selected storage/object filters use custom filled SVG faces with open cream seams. Storage has two top faces separated by an open tape stripe; unselected icons keep their Lucide outlines.
+Type filters use navy for locations, teal for storage and yellow for objects. Selected icons are entirely filled; unselected icons retain their Lucide outlines. View selection is distinguished by a subtle neutral tile and the corresponding icon.
+
+## Visual design
+
+The approved lighter design keeps the coral background and cream panels, with 2px card/field borders, 1.75px outline icons and 16–18px corner radii. Headings and titles use the bundled 700 weight, labels 600 and body text 400. Browsing/search toolbars share an 83px white surface with a subtle shadow instead of an orange frame. Add fields use neutral borders and type-colored text/icons; valid Save uses a pale teal surface and teal border. Save still stays disabled and gray until required values are valid.
+
+The white 3px main-menu indicator remains under the active Home, Search or Add icon and slides between them over 200ms. Selected main icons still lift slightly. List/grid, route, hover and bounce behavior remain unchanged. List add tiles show a circle-plus, label and chevron while retaining contextual placement.
 
 ## Pull to refresh in installed apps
 

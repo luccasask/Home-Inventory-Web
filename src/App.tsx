@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { ArrowDown, Check, House, LockKeyhole, PackagePlus, Plus, RotateCw } from 'lucide-react';
+import { ArrowDown, Check, ChevronRight, CirclePlus, House, LockKeyhole, PackagePlus, RotateCw } from 'lucide-react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { ancestorsOf, childrenOf, contentLabel, routeFor, type InventoryItem } from './domain/inventory';
 import { loadInventory } from './services/inventoryRepository';
@@ -225,7 +225,7 @@ export default function App() {
             : <>
               <div className={`inventory-list inventory-list--${viewMode}`} aria-label={`Innehåll i ${title}`}>
                 {children.map(item => <InventoryCard key={item.id} item={item} items={items} />)}
-                {current?.type !== 'OBJECT' && <Link className="add-card" to={`/add?parent=${current?.publicId ?? 'home'}`} aria-label="Lägg till föremål" title="Lägg till föremål">{viewMode === 'grid' ? <><span>Lägg till…</span><span className="card-icon-wrap"><PackagePlus aria-hidden="true" /></span></> : <Plus aria-hidden="true" />}</Link>}
+                {current?.type !== 'OBJECT' && <Link className="add-card" to={`/add?parent=${current?.publicId ?? 'home'}`} aria-label="Lägg till föremål" title="Lägg till föremål">{viewMode === 'grid' ? <><span>Lägg till…</span><span className="card-icon-wrap"><PackagePlus aria-hidden="true" /></span></> : <><CirclePlus aria-hidden="true" /><span>Lägg till…</span><ChevronRight className="add-card-chevron" aria-hidden="true" /></>}</Link>}
               </div>
               {current?.description && <p className="item-description">{current.description}</p>}
               {children.length === 0 && current?.type !== 'OBJECT' && <p className="demo-empty">{isHome ? 'Ditt inventarium är tomt.' : 'Här finns inget innehåll ännu.'}</p>}

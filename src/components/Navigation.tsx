@@ -1,7 +1,6 @@
-import { Box, ChevronLeft, Copy, FolderPen, House, LayoutGrid, MapPin, Package, PackagePlus, Rows2, Search } from 'lucide-react';
+import { Box, ChevronLeft, Copy, FolderPen, House, LayoutGrid, MapPin, Package, PackagePlus, Menu, Search } from 'lucide-react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { isAddPath } from '../domain/navigation';
-import { FilledTypeIcon } from './FilledTypeIcon';
 
 export type ViewMode = 'list' | 'grid';
 
@@ -17,7 +16,7 @@ export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, on
       {editRoute ? <Link to={editRoute} aria-label="Redigera föremål" title="Redigera föremål"><FolderPen /></Link>
         : <button type="button" disabled aria-label="Redigera föremål" title="Öppna ett föremål eller en plats för att redigera"><FolderPen /></button>}
       <button type="button" onClick={() => onViewChange('grid')} aria-pressed={viewMode === 'grid'} aria-label="Visa som grid" title="Visa som grid"><LayoutGrid /></button>
-      <button type="button" onClick={() => onViewChange('list')} aria-pressed={viewMode === 'list'} aria-label="Visa som lista" title="Visa som lista"><Rows2 /></button>
+      <button type="button" onClick={() => onViewChange('list')} aria-pressed={viewMode === 'list'} aria-label="Visa som lista" title="Visa som lista"><Menu /></button>
     </nav>
   );
 }
@@ -30,16 +29,16 @@ export function SearchToolbar({ viewMode, onViewChange }: { viewMode: ViewMode; 
       {([{ type: 'LOCATION', label: 'Visa endast platser', Icon: MapPin },
         { type: 'STORAGE', label: 'Visa endast förvaringar', Icon: Package },
         { type: 'OBJECT', label: 'Visa endast föremål', Icon: Box }] as const).map(({ type, label, Icon }) =>
-        <button key={type} type="button" aria-label={label} title={selected === type ? 'Visa alla typer' : label}
+        <button key={type} type="button" data-type={type} aria-label={label} title={selected === type ? 'Visa alla typer' : label}
           aria-pressed={selected === type} onClick={() => {
             const next = new URLSearchParams(params);
             if (selected === type) next.delete('type'); else next.set('type', type);
             setParams(next, { replace: true });
-          }}>{selected === type && type !== 'LOCATION' ? <FilledTypeIcon storage={type === 'STORAGE'} /> : <Icon aria-hidden="true" />}</button>)}
+          }}><Icon aria-hidden="true" /></button>)}
     </div>
     <div className="search-view-controls" role="group" aria-label="Visningsläge">
       <button type="button" onClick={() => onViewChange('grid')} aria-pressed={viewMode === 'grid'} aria-label="Visa som grid" title="Visa som grid"><LayoutGrid /></button>
-      <button type="button" onClick={() => onViewChange('list')} aria-pressed={viewMode === 'list'} aria-label="Visa som lista" title="Visa som lista"><Rows2 /></button>
+      <button type="button" onClick={() => onViewChange('list')} aria-pressed={viewMode === 'list'} aria-label="Visa som lista" title="Visa som lista"><Menu /></button>
     </div>
   </nav>;
 }
