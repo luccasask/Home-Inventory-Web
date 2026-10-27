@@ -175,7 +175,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .search-page--results .search-header, .search-page--engaged .search-header { top: 0; left: 0; right: 0; transform: none; }
 .search-form { display: flex; align-items: center; gap: 8px; height: 66px; padding: 6px 16px 6px 20px; border: 4px solid var(--terra); border-radius: 42px; }
 .search-form:focus-within { box-shadow: 0 0 0 2px rgb(233 124 91 / 12%); }
-.search-form input { min-width: 0; flex: 1; width: 100%; padding: 0; border: 0; outline: none; background: transparent; color: var(--navy); font: inherit; font-size: 32px; font-weight: 900; line-height: 1.2; }
+.search-form input { min-width: 0; flex: 1; width: 100%; padding: 0; border: 0; outline: none; background: transparent; color: var(--navy); font: inherit; font-size: 32px; font-weight: 400; line-height: 1.2; }
 .search-form input::placeholder { color: var(--terra); opacity: 1; font-weight: 400; }
 .search-form input::-webkit-search-cancel-button { -webkit-appearance: none; }
 .search-form button { display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0; border: 0; background: none; color: var(--terra); height: 44px; }
@@ -226,6 +226,11 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .add-select select { appearance: none; -webkit-appearance: none; padding-left: 46px; padding-right: 50px; text-overflow: ellipsis; }
 .add-select > svg { position: absolute; width: 26px; height: 28px; left: 18px; top: 19px; color: var(--terra); pointer-events: none; stroke-width: 1.6; }
 .add-select > .select-chevron { left: auto; right: 18px; width: 30px; stroke-width: 3; }
+.add-select--type[data-type="LOCATION"] { --type-color: var(--navy); }
+.add-select--type[data-type="STORAGE"] { --type-color: var(--teal); }
+.add-select--type[data-type="OBJECT"] { --type-color: var(--amber); }
+.add-select--type select { color: var(--type-color); border-color: var(--type-color); }
+.add-select--type > svg { color: var(--type-color); }
 .add-field textarea { font-size: 16px; min-height: 148px; line-height: 1.45; resize: vertical; }
 .add-field-note { margin: 6px 4px 0; color: #656464; font-size: 13px; line-height: 1.4; }
 .add-field-note button { border: 0; background: none; color: var(--navy); text-decoration: underline; }

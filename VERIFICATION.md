@@ -1,5 +1,12 @@
 # Home browsing verification
 
+## Type colors, object cards and search text — 27 October 2026
+
+- Add/edit type selector colors its border, text and both icons navy for LOCATION, teal for STORAGE and amber for OBJECT. Other form fields retain their existing colors.
+- OBJECT cards omit the chevron; LOCATION/STORAGE retain it in list view. The complete card remains the same Link with the same immediate navigation and gesture handlers.
+- Entered search text now uses the placeholder's 400 weight and size, with navy color.
+- Browser checks confirm all three type colors, correct arrow presence/absence in Kök's list, successful Kastrull-card navigation, live search and computed search font parity (32px/400), no console errors. TypeScript, production build and whitespace checks pass.
+
 ## Contextual Add, search focus and Home return — 27 October 2026
 
 - Browse Add tiles carry the current record's public ID in the add URL. The local draft selects that location/storage, including its full path; Mitt hem selects root. Main-menu Add remains blank. Editing still takes its placement from the edited record.

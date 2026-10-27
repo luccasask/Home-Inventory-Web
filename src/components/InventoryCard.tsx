@@ -28,7 +28,7 @@ export function InventoryCard({ item, items }: { item: InventoryItem; items: rea
         <FitText className="card-title">{item.name}</FitText>
         <span className="card-subtitle">{item.type === 'OBJECT' ? 'Föremål' : `${count} förvaringar`}</span>
       </span>
-      <ChevronRight className="card-chevron" aria-hidden="true" />
+      {item.type !== 'OBJECT' && <ChevronRight className="card-chevron" aria-hidden="true" />}
     </Link>
   );
 }

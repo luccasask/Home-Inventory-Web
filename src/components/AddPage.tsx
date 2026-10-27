@@ -67,7 +67,7 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
       </div>
       <div className="add-field">
         <label htmlFor={`${id}-type`}>Typ:</label>
-        <div className="add-select">
+        <div className="add-select add-select--type" data-type={type}>
           <TypeIcon aria-hidden="true" />
           <select id={`${id}-type`} value={type} onChange={event => setDraft(current => ({ ...current, type: event.target.value as ItemType }))}>
             <option value="LOCATION">Plats</option><option value="STORAGE">Förvaring</option><option value="OBJECT">Föremål</option>
