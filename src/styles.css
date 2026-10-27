@@ -285,6 +285,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .pin-dots { display: flex; gap: 18px; margin: 12px 0; }
 .pin-dots span { width: 17px; height: 17px; border: 2px solid var(--terra); border-radius: 50%; }
 .pin-dots .filled { background: var(--terra); }
+.pin-keyboard-input { -webkit-text-security: disc; }
 .pin-keypad { display: grid; grid-template-columns: repeat(3, 68px); gap: 12px 22px; }
 .pin-keypad button { height: 58px; display: flex; align-items: center; justify-content: center; border: 2px solid #e97c5b66; border-radius: 19px; color: var(--navy); background: transparent; font-size: 28px; font-weight: 600; }
 .pin-keypad button:hover { background: #e97c5b15; }

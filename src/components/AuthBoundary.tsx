@@ -149,11 +149,7 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
   useLayoutEffect(() => { if (showLock && !checking) lockHeading.current?.focus({ preventScroll: true }); }, [showLock, checking, allowed, setup, Boolean(firstPin)]);
   return <>
     {session && allowed && opened && <div className="authenticated-app" hidden={showLock} inert={showLock}>{children}</div>}
-    {showLock && <div className="app-shell auth-shell" {...feedback} onKeyDown={event => {
-      if (!session || !allowed || event.repeat || event.target instanceof HTMLInputElement || event.ctrlKey || event.metaKey || event.altKey) return;
-      if (/^\d$/.test(event.key)) { event.preventDefault(); digit(event.key); }
-      else if (event.key === 'Backspace' && !busy) { event.preventDefault(); setPin(current => current.slice(0, -1)); }
-    }}>
+    {showLock && <div className="app-shell auth-shell" {...feedback}>
       <main className="inventory-panel auth-panel">
         <House className="auth-house" aria-hidden="true" />
         {checking ? <p role="status">Kontrollerar inloggningen…</p> : !session ? <>
@@ -181,7 +177,8 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
           <h1 ref={lockHeading} tabIndex={-1}>{setup ? firstPin ? 'Bekräfta din kod' : 'Välj din pinkod' : 'Lås upp ditt hem'}</h1>
           <p>{setup ? 'Fyra siffror för skärmlåset på den här enheten.' : 'Ange din fyrsiffriga pinkod.'}</p>
           <div className="pin-dots" role="status" aria-label={`${pin.length} av 4 siffror angivna`}>{[0, 1, 2, 3].map(index => <span key={index} className={index < pin.length ? 'filled' : ''} />)}</div>
-          <input className="sr-only" aria-label="Pinkod" type="password" inputMode="numeric" autoComplete="off" maxLength={4} value={pin}
+          {/* Keyboard entry for the custom keypad; do not invite password-manager autofill. */}
+          <input className="sr-only pin-keyboard-input" aria-label="Pinkod" type="text" inputMode="numeric" autoComplete="off" spellCheck={false} maxLength={4} value={pin}
             disabled={busy || wait > 0} onChange={event => { const next = event.target.value.replace(/\D/g, '').slice(0, 4); setPin(next); if (next.length === 4) void submitPin(next); }} />
           <div className="pin-keypad" aria-label="Knappsats för pinkod">{['1','2','3','4','5','6','7','8','9','','0','delete'].map((value, index) => value === '' ? <span key={index} />
             : <button key={index} type="button" disabled={busy || wait > 0} aria-label={value === 'delete' ? 'Ta bort sista siffran' : value}
