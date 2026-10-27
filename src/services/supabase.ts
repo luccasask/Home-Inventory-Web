@@ -19,5 +19,5 @@ export const configurationError = !url || !key || !inventoryId
     ? 'Supabase-konfigurationen är ogiltig. Använd endast en publik API-nyckel.' : null;
 
 export const supabase = configurationError ? null : createClient(url, key, {
-  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
 });

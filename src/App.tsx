@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Check, House, PackagePlus, Plus } from 'lucide-react';
+import { Check, House, LockKeyhole, PackagePlus, Plus } from 'lucide-react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { ancestorsOf, childrenOf, contentLabel, routeFor, type InventoryItem } from './domain/inventory';
 import { loadInventory } from './services/inventoryRepository';
@@ -82,25 +82,45 @@ export default function App() {
   const list = useRef<HTMLDivElement>(null);
   const firstRender = useRef(true);
   const activeRequest = useRef<AbortController | null>(null);
-  const refresh = useCallback(async () => {
+  const lastRefresh = useRef(0);
+  const refresh = useCallback(async (background = false) => {
+    if (background && (activeRequest.current || Date.now() - lastRefresh.current < 5000)) return;
     activeRequest.current?.abort();
     const controller = new AbortController();
     activeRequest.current = controller;
-    setLoading(true);
-    setError('');
+    if (!background) { setLoading(true); setError(''); }
     try {
       const result = await loadInventory(controller.signal);
       if (controller.signal.aborted) return;
       setItems(result);
+      lastRefresh.current = Date.now(); setError('');
       setStatus('Innehållet är uppdaterat från Supabase.');
     } catch (cause) {
       if (controller.signal.aborted) return;
       const message = cause instanceof Error ? cause.message : 'Innehållet kunde inte hämtas. Försök igen.';
-      setError(message);
+      if (!background) setError(message);
+      else setCopyNotice({ text: 'Kunde inte uppdatera innehållet. Visar senast hämtade uppgifter.', error: true });
       setStatus(message);
-    } finally { if (!controller.signal.aborted) setLoading(false); }
+    } finally {
+      if (activeRequest.current === controller) activeRequest.current = null;
+      if (!controller.signal.aborted) setLoading(false);
+    }
   }, []);
   useEffect(() => { void refresh(); return () => activeRequest.current?.abort(); }, [refresh]);
+  useEffect(() => {
+    const resume = () => {
+      if (document.visibilityState === 'visible' && !mainPanel.current?.closest('[hidden]')) void refresh(true);
+    };
+    const unlocked = () => { requestAnimationFrame(() => void refresh(true)); };
+    window.addEventListener('focus', resume); window.addEventListener('online', resume);
+    document.addEventListener('visibilitychange', resume); window.addEventListener('inventory-unlocked', unlocked);
+    return () => {
+      window.removeEventListener('focus', resume); window.removeEventListener('online', resume);
+      document.removeEventListener('visibilitychange', resume); window.removeEventListener('inventory-unlocked', unlocked);
+    };
+  }, [refresh]);
+  const activePath = useRef(location.pathname);
+  activePath.current = location.pathname;
   useEffect(() => {
     list.current?.scrollTo(0, 0);
     if (firstRender.current) firstRender.current = false;
@@ -141,6 +161,7 @@ export default function App() {
 
   return (
     <div className="app-shell" {...controlFeedback}>
+      <button type="button" className="app-lock-button" aria-label="Lås appen" title="Lås appen" onClick={() => window.dispatchEvent(new Event('inventory-lock'))}><LockKeyhole aria-hidden="true" /></button>
       <main ref={mainPanel} className={`inventory-panel inventory-panel--${viewMode}`} id="main-content" onClick={event => {
         if (!isSearch || event.defaultPrevented || !(event.target instanceof Element)
           || event.target.closest('a, button, input, select, textarea, nav, dialog')) return;
@@ -149,6 +170,19 @@ export default function App() {
         <PageTransition path={location.pathname} back={navigationType !== 'POP' && location.state?.direction === 'back'}
           viaPanelMenu={navigationType !== 'POP' && location.state?.navigation === 'panel'} swipeHandlers={swipeHandlers}>{active => isAdd
           ? <AddPage items={items} loading={loading} error={error} active={active} onRetry={() => void refresh()} onReadyChange={setAddReady}
+              onSaved={saved => {
+                setItems(current => [...current.filter(item => item.publicId !== saved.publicId), saved]);
+                setCopyNotice({ text: 'Föremålet är sparat', error: false });
+                void refresh();
+                if (activePath.current === location.pathname) navigate(routeFor(saved), { replace: true, state: { direction: 'back' } });
+              }}
+              onDeleted={deleted => {
+                setItems(current => current.filter(item => item.id !== deleted.id && !ancestorsOf(current, item).some(parent => parent.id === deleted.id)));
+                const parent = items.find(item => item.id === deleted.parentId);
+                setCopyNotice({ text: 'Föremålet är raderat', error: false });
+                void refresh();
+                if (activePath.current === location.pathname) navigate(parent ? routeFor(parent) : '/', { replace: true, state: { direction: 'back' } });
+              }}
               editing={Boolean(editId)} item={editingItem} initialParent={initialParent} />
           : isSearch
           ? <SearchPage items={items} loading={loading} error={error} viewMode={viewMode} active={active}
@@ -198,7 +232,7 @@ export default function App() {
       {copyNotice && <div className="copy-toast" role={copyNotice.error ? 'alert' : 'status'}>
         {!copyNotice.error && <Check aria-hidden="true" />}<span>{copyNotice.text}</span>
       </div>}
-      <span className="sr-only">{loading ? 'Ansluter till Supabase…' : error ? 'Supabase · Ingen anslutning' : 'Supabase · Endast läsning'}</span>
+      <span className="sr-only">{loading ? 'Ansluter till Supabase…' : error ? 'Supabase · Ingen anslutning' : 'Supabase · Inloggad'}</span>
       <span role="status" className="sr-only">{status}</span>
     </div>
   );

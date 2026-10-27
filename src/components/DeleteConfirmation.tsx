@@ -1,8 +1,7 @@
 import { useId, useLayoutEffect, useRef } from 'react';
 import { OctagonAlert } from 'lucide-react';
 
-/** Visual confirmation only: no delete callback or database operation exists. */
-export function DeleteConfirmation({ onDismiss }: { onDismiss: () => void }) {
+export function DeleteConfirmation({ onDismiss, onConfirm, busy, error }: { onDismiss: () => void; onConfirm: () => void; busy: boolean; error: string }) {
   const id = useId();
   const dialog = useRef<HTMLDialogElement>(null);
   const cancel = useRef<HTMLButtonElement>(null);
@@ -27,9 +26,9 @@ export function DeleteConfirmation({ onDismiss }: { onDismiss: () => void }) {
     <h2 id={`${id}-title`}><OctagonAlert aria-hidden="true" /><span>Vill du ta bort föremålet?</span></h2>
     <p id={`${id}-warning`}>Alla föremål inuti kommer att raderas.</p>
     <div className="delete-confirmation-actions">
-      <button type="button" className="delete-confirmation-delete" disabled aria-describedby={`${id}-note`}>Radera</button>
-      <button ref={cancel} type="button" className="delete-confirmation-cancel" onClick={onDismiss}>Avbryt</button>
+      <button type="button" className="delete-confirmation-delete" disabled={busy} onClick={onConfirm}>{busy ? 'Raderar…' : 'Radera'}</button>
+      <button ref={cancel} type="button" className="delete-confirmation-cancel" disabled={busy} onClick={onDismiss}>Avbryt</button>
     </div>
-    <p id={`${id}-note`} className="delete-confirmation-note">Det går inte att radera ännu.</p>
+    <p id={`${id}-note`} className="delete-confirmation-note" role={error ? 'alert' : undefined}>{error || 'Detta går inte att ångra.'}</p>
   </dialog>;
 }

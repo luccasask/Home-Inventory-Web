@@ -216,6 +216,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .add-header h1 { min-height: 58px; padding-right: 0; font-size: clamp(24px, 7.5vw, 32px); gap: 12px; }
 .add-header .hierarchy-summary { margin: 12px 0; }
 .add-fields { width: 100%; max-width: 600px; margin-inline: auto; padding: 0 16px 20px; }
+.add-fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .add-field { margin-bottom: 16px; }
 .add-field label { display: block; margin: 0 4px 8px; font-size: 24px; font-weight: 900; line-height: 1.25; }
 .add-field input, .add-field select, .add-field textarea { display: block; width: 100%; min-width: 0; border: 4px solid var(--terra); border-radius: 20px; padding: 12px 20px; background: var(--cream); color: var(--terra-text); font: inherit; font-size: 24px; font-weight: 600; }
@@ -263,3 +264,30 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
   .add-field input, .add-field select { font-size: 21px; }
   .navigation-indicator::after { width: 80px; }
 }
+.authenticated-app { height: 100dvh; }
+.authenticated-app[hidden] { display: none; }
+.auth-shell { min-height: 0; }
+.auth-panel { align-items: center; justify-content: center; padding: 24px; overflow-y: auto; text-align: center; gap: 12px; }
+.auth-house { width: 58px; height: 58px; color: var(--terra); flex-shrink: 0; }
+.auth-panel h1 { font-size: clamp(27px, 7vw, 36px); font-weight: 900; margin: 4px 0; line-height: 1.15; }
+.auth-panel h1:focus { outline: none; }
+.app-lock-button { position: absolute; top: 10px; right: 12px; z-index: 3; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; padding: 5px; border: 0; background: var(--cream); color: var(--navy); border-radius: 50%; }
+.app-lock-button svg { width: 18px; height: 18px; }
+.auth-panel p { margin: 0; max-width: 390px; line-height: 1.5; font-size: 15px; color: #656464; }
+.auth-email-form { width: 100%; max-width: 380px; display: grid; gap: 14px; text-align: left; margin: 16px 0; }
+.auth-email-form label { font-size: 20px; font-weight: 900; }
+.auth-email-form input { width: 100%; padding: 16px; border: 3px solid var(--terra); border-radius: 20px; color: var(--navy); background: var(--cream); font: inherit; font-size: 18px; }
+.auth-email-form input:focus { outline: none; box-shadow: 0 0 0 3px #e97c5b22; }
+.auth-primary { display: flex; align-items: center; justify-content: center; gap: 12px; background: var(--teal); color: var(--cream); font: inherit; font-size: 18px; font-weight: 900; padding: 16px; border: 0; border-radius: 20px; }
+.auth-primary:disabled { opacity: .6; }
+.auth-text-button { color: var(--navy); background: none; border: 0; padding: 10px; text-decoration: underline; text-underline-offset: 4px; font-size: 14px; }
+.auth-lock-icon { width: 28px; height: 28px; }
+.pin-dots { display: flex; gap: 18px; margin: 12px 0; }
+.pin-dots span { width: 17px; height: 17px; border: 2px solid var(--terra); border-radius: 50%; }
+.pin-dots .filled { background: var(--terra); }
+.pin-keypad { display: grid; grid-template-columns: repeat(3, 68px); gap: 12px 22px; }
+.pin-keypad button { height: 58px; display: flex; align-items: center; justify-content: center; border: 2px solid #e97c5b66; border-radius: 19px; color: var(--navy); background: transparent; font-size: 28px; font-weight: 600; }
+.pin-keypad button:hover { background: #e97c5b15; }
+.pin-keypad button:disabled { opacity: .4; }
+.auth-panel .auth-error, .auth-error { color: #b43430; }
+@media (max-height: 720px) { .auth-panel { gap: 8px; padding: 16px; justify-content: flex-start; } .auth-house { width: 38px; height: 38px; } .pin-keypad { gap: 8px 22px; } .pin-keypad button { height: 48px; } }

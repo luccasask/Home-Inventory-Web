@@ -9,6 +9,7 @@ export interface InventoryItem {
   name: string;
   icon: string;
   description?: string;
+  revision?: string;
 }
 
 export function childrenOf(items: readonly InventoryItem[], parentId: string | null) {

@@ -1,10 +1,11 @@
-import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Box, ChevronDown, FolderPen, MapPin, Package, PackagePlus, Save, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { InventoryItem, ItemType } from '../domain/inventory';
 import { draftFor, draftIsComplete, placementChoices } from '../domain/itemForm';
 import { FitText } from './FitText';
 import { DeleteConfirmation } from './DeleteConfirmation';
+import { deleteInventoryItem, saveInventoryItem } from '../services/inventoryRepository';
 
 const MAX_WORDS = 200;
 function wordCount(text: string) {
@@ -18,21 +19,32 @@ function limitWords(text: string) {
   return text;
 }
 
-/** Local visual draft only. This component has no persistence or write service. */
-export function AddPage({ items, loading, error, active, onRetry, onReadyChange, editing = false, item, initialParent }: {
+export function AddPage({ items, loading, error, active, onRetry, onReadyChange, onSaved, onDeleted, editing = false, item, initialParent }: {
   items: readonly InventoryItem[]; loading: boolean; error: string; active: boolean; onRetry: () => void;
   onReadyChange: (ready: boolean) => void;
+  onSaved: (item: InventoryItem) => void; onDeleted: (item: InventoryItem) => void;
   editing?: boolean; item?: InventoryItem; initialParent?: InventoryItem | null;
 }) {
   const id = useId();
   const [draft, setDraft] = useState(() => draftFor(item, initialParent));
   const [deleteOpen, setDeleteOpen] = useState(false);
+  // Keep the version the draft was opened from, even during a background refresh.
+  const [original, setOriginal] = useState(item);
+  const [newPublicId, setNewPublicId] = useState(() => crypto.randomUUID());
+  const [busy, setBusy] = useState(false);
+  const busyGuard = useRef(false);
+  const [saveError, setSaveError] = useState('');
   const { name, type, place, description } = draft;
   const heading = useRef<HTMLHeadingElement>(null);
   const form = useRef<HTMLFormElement>(null);
   const wasActive = useRef(active);
   const draftKey = item?.id ?? (initialParent === null ? 'home' : initialParent?.id);
   const initializedItem = useRef(draftKey);
+  useEffect(() => {
+    const close = () => setDeleteOpen(false);
+    window.addEventListener('inventory-locked', close);
+    return () => window.removeEventListener('inventory-locked', close);
+  }, []);
   useLayoutEffect(() => {
     setDeleteOpen(false);
     if (active) {
@@ -40,6 +52,7 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
       // draft before painting it again, while keeping the exit animation intact.
       if (!wasActive.current || initializedItem.current !== draftKey) {
         setDraft(draftFor(item, initialParent));
+        setOriginal(item); setNewPublicId(crypto.randomUUID()); setSaveError('');
       }
       form.current?.scrollTo(0, 0);
       heading.current?.focus({ preventScroll: true });
@@ -47,10 +60,10 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
     wasActive.current = active;
     initializedItem.current = draftKey;
   }, [active, draftKey]);
-  const places = useMemo(() => placementChoices(items, item, initialParent), [items, item, initialParent]);
+  const places = useMemo(() => placementChoices(items, item, initialParent, type), [items, item, initialParent, type]);
   useLayoutEffect(() => {
-    onReadyChange(active && (!editing || Boolean(item)) && draftIsComplete(draft, places));
-  }, [active, editing, item, draft, places, onReadyChange]);
+    onReadyChange(active && !loading && !busy && (!editing || Boolean(original?.revision)) && draftIsComplete(draft, places));
+  }, [active, loading, busy, editing, original, draft, places, onReadyChange]);
   const TypeIcon = type === 'LOCATION' ? MapPin : type === 'STORAGE' ? Package : Box;
   const HeadingIcon = editing ? FolderPen : PackagePlus;
 
@@ -60,10 +73,18 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
       <p className="hierarchy-summary">Namn | Typ | Plats | Beskrivning</p>
       <div className="header-rule" />
     </header>
-    {editing && !item ? <div className="empty-state" role={loading ? 'status' : 'alert'}>
+    {(editing && !item) || (loading && !items.length) ? <div className="empty-state" role={loading ? 'status' : 'alert'}>
       <p>{loading ? 'Hämtar föremålet…' : error || 'Föremålet saknas eller är inte tillgängligt.'}</p>
       {error ? <button type="button" onClick={onRetry}>Försök igen</button> : !loading && <Link to="/">Till Mitt hem</Link>}
-    </div> : <form ref={active ? form : null} className="inventory-content add-fields" aria-label={editing ? 'Redigera föremålets uppgifter' : 'Uppgifter om föremålet'} onSubmit={event => event.preventDefault()}>
+    </div> : <form id={active ? 'inventory-item-form' : undefined} ref={active ? form : null} className="inventory-content add-fields" aria-label={editing ? 'Redigera föremålets uppgifter' : 'Uppgifter om föremålet'} onSubmit={async event => {
+      event.preventDefault();
+      if (!active || loading || busyGuard.current || !draftIsComplete(draft, places) || (editing && !original?.revision)) return;
+      busyGuard.current = true; setBusy(true); setSaveError('');
+      try { onSaved(await saveInventoryItem(original?.publicId ?? newPublicId, draft, original)); }
+      catch (cause) { setSaveError((cause as Error).message); }
+      finally { busyGuard.current = false; setBusy(false); }
+    }}>
+      <fieldset className="add-fieldset" disabled={busy}>
       <div className="add-field">
         <label htmlFor={`${id}-name`}>Namn:</label>
         <input id={`${id}-name`} value={name} onChange={event => setDraft(current => ({ ...current, name: event.target.value }))}
@@ -74,7 +95,9 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
         <div className="add-select add-select--type" data-type={type}>
           <TypeIcon aria-hidden="true" />
           <select id={`${id}-type`} value={type} onChange={event => setDraft(current => ({ ...current, type: event.target.value as ItemType }))}>
-            <option value="LOCATION">Plats</option><option value="STORAGE">Förvaring</option><option value="OBJECT">Föremål</option>
+            <option value="LOCATION" disabled={editing && original?.type !== 'LOCATION'}>Plats</option>
+            <option value="STORAGE" disabled={editing && original?.type === 'LOCATION'}>Förvaring</option>
+            <option value="OBJECT" disabled={editing && (original?.type === 'LOCATION' || items.some(child => child.parentId === item?.id))}>Föremål</option>
           </select>
           <ChevronDown className="select-chevron" aria-hidden="true" />
         </div>
@@ -102,17 +125,25 @@ export function AddPage({ items, loading, error, active, onRetry, onReadyChange,
         onClick={() => setDeleteOpen(true)} aria-haspopup="dialog" title="Ta bort föremål">
         <Trash2 aria-hidden="true" /><span>Ta bort föremål</span>
       </button>}
-      <p id={`${id}-preview-note`} className="add-field-note">{editing ? 'Det går inte att spara eller radera ännu.' : 'Det går inte att spara ännu.'}</p>
+      </fieldset>
+      {busy && <p className="add-field-note" role="status">Sparar ändringen…</p>}
+      {saveError && <p className="add-field-note auth-error" role="alert">{saveError}</p>}
     </form>}
-    {active && editing && item && deleteOpen && <DeleteConfirmation onDismiss={() => setDeleteOpen(false)} />}
+    {active && editing && original && deleteOpen && <DeleteConfirmation busy={busy} error={saveError} onDismiss={() => { if (!busyGuard.current) setDeleteOpen(false); }} onConfirm={async () => {
+      if (busyGuard.current || !original.revision) return;
+      busyGuard.current = true; setBusy(true); setSaveError('');
+      try { await deleteInventoryItem(original); setDeleteOpen(false); onDeleted(original); }
+      catch (cause) { setSaveError((cause as Error).message); }
+      finally { busyGuard.current = false; setBusy(false); }
+    }} />}
   </section>;
 }
 
 export function AddSavePanel({ ready }: { ready: boolean }) {
   return <div className="add-save-panel">
-    <button className={`context-toolbar add-save-button${ready ? ' add-save-button--ready' : ''}`} type="button" disabled aria-describedby="add-save-note" title="Det går inte att spara ännu.">
+    <button className={`context-toolbar add-save-button${ready ? ' add-save-button--ready' : ''}`} type="submit" form="inventory-item-form" disabled={!ready} aria-describedby="add-save-note">
       <Save aria-hidden="true" /><span>Spara</span>
     </button>
-    <span id="add-save-note" className="sr-only">Det går inte att spara ännu.</span>
+    <span id="add-save-note" className="sr-only">{ready ? 'Spara föremålet.' : 'Ange namn, typ och plats för att spara.'}</span>
   </div>;
 }

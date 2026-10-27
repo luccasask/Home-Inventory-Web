@@ -12,7 +12,7 @@ React + TypeScript + Vite home inventory browser, based on the three supplied Sw
 - Visual add/edit form with existing-place selection; database saving and deleting remain disabled.
 - Touch/pen swipes: right returns a directly opened search result to its original query and filter; other items go to their parent, editors return to the edited item, and main panels follow menu order. Left moves to the next main panel. Vertical scrolling and form controls retain native interactions.
 
-**Content is loaded directly from the existing Supabase PostgreSQL inventory.** The owner explicitly chose no sign-in and public read-only access. Names, descriptions, hierarchy, and contents of this inventory (including future records) are therefore publicly readable through its API. Other inventories, tags, access mappings, and write operations remain inaccessible to anonymous visitors. Refresh reads current database contents. Existing item IDs and public UUIDs are preserved; no inventory records were inserted, changed, or deleted.
+**Content is private and loaded from Supabase after owner authentication.** Sign in by email once per browser/device, then create a four-digit local screen lock. Sessions persist and refresh automatically; clearing browser data or revoking a session requires email authentication again. Supabase owner RLS protects reads and writes; the PIN is only a local screen lock, not server authorization. Public anonymous reading has been revoked. Existing item IDs and public UUIDs are preserved.
 
 ## Run
 
@@ -37,8 +37,10 @@ The build runs TypeScript checks before generating `dist/`.
 
 - `src/components`: cards, icons, and navigation controls.
 - `src/domain`: typed items, hierarchy utilities, and public-ID routes.
-- `src/services/supabase.ts`: public-key client configuration; no authentication session.
-- `src/services/inventoryRepository.ts`: paginated, inventory-scoped database reads.
+- `src/services/supabase.ts`: public-key client configuration with persistent PKCE authentication.
+- `src/components/AuthBoundary.tsx`: email login, owner access verification and screen locking.
+- `src/services/deviceLock.ts`: per-account salted PBKDF2 PIN hashes and local retry cooldowns.
+- `src/services/inventoryRepository.ts`: inventory-scoped reads and owner mutation RPCs.
 - `src/domain/databaseItems.ts`: database mapping, lossless bigint IDs, and hierarchy validation.
 - `src/App.tsx`: browsing state and page composition.
 - `src/styles.css`: design colors, spacing, typography, and responsive rules.
@@ -60,31 +62,37 @@ Manifest paths are relative to the repository base. On iPhone, use Safari → Sh
 
 ## Database access
 
-`supabase/migrations/202610240002_public_web_read.sql` was applied to the existing database after the owner approved public, no-sign-in reading. Do not rerun the original Java bootstrap migration. The additive policy allows `anon` to read the existing inventory's item fields only. Existing desktop-role policies and hierarchy constraints remain active. No authentication tables, tag tables, or administrator credentials are used by the frontend.
+The historical `202610240002_public_web_read.sql` enabled anonymous reading. Private activation removes that policy, revokes anonymous item access, and assigns the inventory's `owner_id` to the explicitly approved Supabase Auth account. Do not rerun that public-read migration or the original Java bootstrap migration. Existing desktop-role policies and hierarchy constraints remain active.
 
 `supabase/rollback_public_web_read.sql` revokes the web reading added by this migration without removing any inventory records. Privileged migrations should be run only from a trusted administrator session, never from the frontend or GitHub Pages build.
 
-Tags and tag-derived icons are not loaded in this version, as requested. Known manual Lucide icons are supported; missing/unsupported icons use a type-based or box fallback. Data editing remains outside this version's scope.
+`202610270001_owner_web_mutations.sql` adds revisions, narrowly scoped authenticated grants and invoker RPCs. Existing owner RLS remains the authorization boundary. Save checks the draft's revision, serializes inventory changes and supports retry-safe creation with client-generated public UUIDs. Delete checks the root revision and atomically deletes its complete subtree, including associated item-tag links through the existing cascade. Existing constraints forbid cycles, object parents, location-type conversion, and converting a populated container to an object. Privileged SQL and owner assignment are never run from the frontend or Pages build.
+
+Supabase Authentication Site URL must be `https://luccasask.github.io/Home-Inventory-Web/`; any local testing redirect must be explicitly allowlisted. Email links must open in the same browser/device that requested them (PKCE). Create/invite the approved owner account administratively; the frontend uses `shouldCreateUser: false` and offers no registration. Configure custom SMTP for reliable email delivery: Supabase's default mailer only supports project-team addresses with restrictive sending limits. Never place an SMTP password or service-role key in Vite configuration.
+
+Tags and tag-derived icons are not loaded in this version. Known manual Lucide icons are supported; missing/unsupported icons use a type-based or box fallback.
+
+The app locks on page hiding/reopening and also offers a lock button. Incorrect local PIN attempts have a persistent cooldown after five failures. PIN recovery signs out locally and requires a new email session before resetting the device PIN, including callbacks in a new tab. The session remains managed by Supabase, separate from this screen lock. On unlock, focus or restored connectivity, inventory reads are coalesced and refreshed without replacing active drafts or resetting search scroll positions. No offline item cache is persisted.
 
 ## Search
 
-Open the search icon in the bottom navigation. The first nonblank character moves the centered field to the top; results update immediately while typing. Enter, the mobile keyboard's search action, and the search button dismiss the keyboard without being required for searching. Clearing the query returns the field to the center. Results search all loaded items, independently of their parents; opening a result uses the item's existing stable URL.
+Open the search icon in the bottom navigation. The field and separator are visible at the top immediately; results update while typing. Results search all loaded items, independently of their parents; opening a result uses the item's existing stable URL.
 
 Ranking prioritizes exact names, name prefixes, partial names, all query words in the name, descriptions, ancestor placement, and finally small spelling mistakes in names. Swedish letters remain distinct. Tags, synonyms, and hypernyms are not searched: the public web role has no access to that data and no new database access is granted.
 
 The three type buttons select locations, storage, or objects. Select the active filter again to show all types. Type and view controls share one outlined toolbar, and selected icons are filled. List/grid selection is shared with browsing and saved locally. The query and optional type filter are kept in the hash URL (`#/search?q=kastrull&type=OBJECT`) using replacement while typing, so reload and browser Back restore the search without a history entry for every character.
 
-## Add-item preview
+## Add and edit items
 
-The rightmost bottom-navigation icon and the add tile open `#/add`. This is a visual form only: the Save button is disabled, form submission is prevented, and no database write service is connected. Drafts stay in component memory and are reset when leaving and returning, including quick navigation during a page slide. Drafts are not stored in local storage or the URL.
+The rightmost bottom-navigation icon and the add tile open `#/add`. Save becomes enabled when name, type and placement are valid. Drafts stay in component memory and are reset when leaving and returning, including quick navigation during a page slide. Drafts are not stored in local storage or the URL. Locking and unlocking preserves an active draft; background refresh retains its original revision to prevent silently overwriting external changes.
 
-Fields are name (up to 120 characters), type (location/storage/object), an existing location, and description (up to 200 words, with a live counter and paste truncation). The location selector includes only existing `LOCATION` records and shows full paths to distinguish matching names. Tags are deferred. The bottom menu marks the current inventory, search, or add section with a light underline.
+Fields are name (up to 120 characters), type (location/storage/object), placement, and description (up to 200 words, with a live counter and paste truncation). The placement selector includes existing locations and containers with full paths, plus Mitt hem. Locations can only be placed within locations or at the root; editing excludes self and descendants. Changing placement moves the same item with its identity and contents intact. Tags are deferred.
 
-The Save button is gray until a nonblank name, a valid type, and an existing location are selected; it then turns teal as a visual readiness cue. It remains disabled in this preview and never writes data.
+The Save button is gray until required fields are valid, then turns teal and submits an owner-authorized database operation. Duplicate submissions are blocked while a request is in progress. Errors retain the draft; successful saves open the saved item's page.
 
-## Edit preview
+## Edit and delete
 
-The pencil-folder control on an item's browsing page opens `#/add/<public-id>` in the same Add panel, with name, type, actual parent placement, and description prefilled. Edit mode adds a gray, disabled delete control below the description. Save and Delete remain disabled; no write privileges, authentication changes, or database mutation calls are introduced.
+The pencil-folder control opens `#/add/<public-id>` with existing values prefilled. The gray trash control opens a confirmation dialog. Cancel, Escape or clicking outside dismisses it without changing data. Radera permanently deletes the item and all descendants in a single database transaction. Save/Delete errors remain visible and do not report success.
 
 Leaving the editor discards its local changes. Returning starts from the original inventory record again; opening normal Add starts empty and hides Delete. Existing storage parents and root-level placement (`Mitt hem`) are preserved. New placement choices exclude the edited location itself and its descendants. Invalid edit links display an unavailable-item state instead of a blank creation form.
 
@@ -92,4 +100,4 @@ Leaving the editor discards its local changes. Returning starts from the origina
 
 Main-menu clicks follow the visual order Home → Search → Add. Selecting a panel to the left moves the outgoing page to the right and brings the selected page in from the left; selecting a panel to the right reverses this. Opening items (including search results), parent links, and browser Back/Forward retain their separate direction rules. Transitions remain 200ms without delaying navigation.
 
-Inventory actions, search controls, and the disabled Save button share the Home toolbar's dimensions and placement: 83px high and full available width on mobile, capped at 520px on desktop.
+Inventory actions, search controls, and Save share the Home toolbar's dimensions and placement: 83px high and full available width on mobile, capped at 520px on desktop.
