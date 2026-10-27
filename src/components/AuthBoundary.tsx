@@ -6,6 +6,7 @@ import { configurationError, inventoryId, supabase } from '../services/supabase'
 import { checkPin, createPin, pinKey, readPin } from '../services/deviceLock';
 import { useControlFeedback } from './useControlFeedback';
 import { authErrorMessage } from '../domain/authErrors';
+import { isEmailCode, normalizeEmailCode } from '../domain/authCode';
 
 function authSessionId(session: Session): string {
   try {
@@ -177,7 +178,7 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
           {sent && <p role="status">En engångskod har skickats. Läs mejlet och ange koden här. Kontrollera även skräpposten.</p>}
           <form className="auth-email-form auth-code-form" onSubmit={async event => {
             event.preventDefault();
-            if (!supabase || busy || !email.trim() || !/^\d{6}$/.test(emailCode)) return;
+            if (!supabase || busy || !email.trim() || !isEmailCode(emailCode)) return;
             setBusy(true); setError(''); setMessage('');
             try {
               sessionStorage.setItem('inventory-auth-return', route.pathname + route.search);
@@ -188,10 +189,10 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
             finally { setBusy(false); }
           }}>
             <label htmlFor="login-code">Engångskod från mejlet</label>
-            <input id="login-code" className="auth-code-input" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6}
-              value={emailCode} onChange={event => setEmailCode(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="6 siffror" readOnly={busy} required aria-describedby="login-code-help" />
+            <input id="login-code" className="auth-code-input" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}|[0-9]{8}"
+              value={emailCode} onChange={event => setEmailCode(normalizeEmailCode(event.target.value))} placeholder="Koden från mejlet" readOnly={busy} required aria-describedby="login-code-help" />
             <p id="login-code-help">Har du redan en kod kan du ange den direkt. Din fyrsiffriga pinkod används efter inloggningen.</p>
-            <button className="auth-primary" disabled={busy || !email.trim() || emailCode.length !== 6 || !supabase}>{busy ? 'Vänta…' : 'Logga in'}</button>
+            <button className="auth-primary" disabled={busy || !email.trim() || !isEmailCode(emailCode) || !supabase}>{busy ? 'Vänta…' : 'Logga in'}</button>
           </form>
         </> : allowed ? <>
           <LockKeyhole className="auth-lock-icon" aria-hidden="true" />
