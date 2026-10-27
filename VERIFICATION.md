@@ -1,5 +1,11 @@
 # Home browsing verification
 
+## Text-led heading balance and trailing descriptions — 27 October 2026
+
+- Descriptions follow the complete content list in both modes again. Grid descriptions retain a 20px gap after the icons.
+- Header icons stay directly left of their titles. A flexible visual counterweight brings the text toward the panel center: offset 8.5px on 430px screens and 6.5px on 320px screens, with exact text centering at desktop widths. Existing FitText behavior keeps longer titles readable without clipping.
+- Browser checks cover Kök and Köksskåp, Add heading at 320px (24px text), grid DOM order and 20px gap, exact desktop title center at 512px on a 1024px screen, no horizontal overflow or console errors. TypeScript, production build and whitespace checks pass. Navigation and database services are unchanged.
+
 ## Scoped search return and UI consistency — 27 October 2026
 
 - Only Search result links carry their source search URL in route state. Right swipe on those records restores that exact query/filter. Ordinary child links do not inherit the origin: right swipe follows the real parent again. Editors and main panels restore their previous swipe destinations; Search → Home uses the existing remembered Home route.

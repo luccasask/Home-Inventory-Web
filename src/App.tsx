@@ -165,12 +165,11 @@ export default function App() {
             : loading && items.length === 0 ? <p className="empty-state">Hämtar innehåll…</p>
             : missing ? <div className="empty-state"><p>Platsen saknas eller är inte tillgänglig.</p><Link to="/">Till Mitt hem</Link></div>
             : <>
-              {viewMode === 'grid' && current?.description && <p className="item-description">{current.description}</p>}
               <div className={`inventory-list inventory-list--${viewMode}`} aria-label={`Innehåll i ${title}`}>
                 {children.map(item => <InventoryCard key={item.id} item={item} items={items} />)}
                 {current?.type !== 'OBJECT' && <Link className="add-card" to={`/add?parent=${current?.publicId ?? 'home'}`} aria-label="Lägg till föremål" title="Lägg till föremål">{viewMode === 'grid' ? <><span>Lägg till…</span><span className="card-icon-wrap"><PackagePlus aria-hidden="true" /></span></> : <Plus aria-hidden="true" />}</Link>}
               </div>
-              {viewMode === 'list' && current?.description && <p className="item-description">{current.description}</p>}
+              {current?.description && <p className="item-description">{current.description}</p>}
               {children.length === 0 && current?.type !== 'OBJECT' && <p className="demo-empty">{isHome ? 'Ditt inventarium är tomt.' : 'Här finns inget innehåll ännu.'}</p>}
             </>}
         </div>
