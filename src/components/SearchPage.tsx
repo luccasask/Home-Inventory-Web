@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Search, X } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import type { InventoryItem, ItemType } from '../domain/inventory';
@@ -16,12 +16,6 @@ export function SearchPage({ items, loading, error, viewMode, active, onRetry, s
   const params = useMemo(() => new URLSearchParams(search), [search]);
   const query = params.get('q') ?? '';
   const submitted = Boolean(query.trim());
-  const [engaged, setEngaged] = useState(false);
-  const wasActive = useRef(active);
-  useLayoutEffect(() => {
-    if (active && !wasActive.current) setEngaged(false);
-    wasActive.current = active;
-  }, [active]);
   const rawType = params.get('type');
   const type = ['LOCATION', 'STORAGE', 'OBJECT'].includes(rawType ?? '') ? rawType as ItemType : null;
   const input = useRef<HTMLInputElement>(null);
@@ -36,23 +30,23 @@ export function SearchPage({ items, loading, error, viewMode, active, onRetry, s
     setParams(next, { replace: true });
   };
 
-  return <section className={`search-page${submitted ? ' search-page--results' : ''}${engaged ? ' search-page--engaged' : ''}`} aria-label="Sök i inventariet">
+  return <section className="search-page" aria-label="Sök i inventariet">
     <h1 className="sr-only">Sök i inventariet</h1>
     <header className="search-header">
       <form className="search-form" role="search" onSubmit={event => {
         event.preventDefault();
         input.current?.blur();
       }}>
-        <button className="search-submit" type="submit" aria-label="Sök" title="Sök"><Search aria-hidden="true" /></button>
-        <input ref={active ? input : null} type="search" value={query} onFocus={() => setEngaged(true)} onChange={event => updateQuery(event.target.value)}
-          placeholder="Sök…" aria-label="Sök efter föremål, förvaring eller plats" maxLength={120} enterKeyHint="search" autoComplete="off" />
+        <button className="search-submit" type="button" aria-label="Sök" title="Sök" onClick={() => input.current?.focus({ preventScroll: true })}><Search aria-hidden="true" /></button>
+        <input ref={active ? input : null} type="search" value={query} onChange={event => updateQuery(event.target.value)}
+          placeholder="..." aria-label="Sök efter föremål, förvaring eller plats" maxLength={120} enterKeyHint="search" autoComplete="off" />
         {query && <button className="search-clear" type="button" aria-label="Rensa sökningen" onClick={() => {
           updateQuery('');
           input.current?.focus({ preventScroll: true });
         }}><X aria-hidden="true" /></button>}
       </form>
       <p className="search-summary" role={active ? 'status' : undefined}>
-        {submitted ? loading ? 'Hämtar ditt inventarium…' : error ? 'Sökningen kunde inte slutföras' : summary : '\u00a0'}
+        {submitted ? loading ? 'Hämtar ditt inventarium…' : error ? 'Sökningen kunde inte slutföras' : summary : 'sök efter föremål.'}
       </p>
       <div className="header-rule" />
     </header>

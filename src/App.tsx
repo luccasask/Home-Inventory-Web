@@ -14,11 +14,13 @@ import { AddPage, AddSavePanel } from './components/AddPage';
 import { isAddPath } from './domain/navigation';
 import { swipeTarget } from './domain/swipe';
 import { useSwipeNavigation } from './components/useSwipeNavigation';
+import { useControlFeedback } from './components/useControlFeedback';
 
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const navigationType = useNavigationType();
+  const controlFeedback = useControlFeedback();
   const isSearch = location.pathname === '/search';
   const isAdd = isAddPath(location.pathname);
   const editId = location.pathname.startsWith('/add/') ? location.pathname.slice('/add/'.length) : null;
@@ -123,8 +125,12 @@ export default function App() {
   useEffect(() => { document.title = `${title} · Heminventering`; }, [title]);
 
   return (
-    <div className="app-shell">
-      <main className={`inventory-panel inventory-panel--${viewMode}`} id="main-content">
+    <div className="app-shell" {...controlFeedback}>
+      <main className={`inventory-panel inventory-panel--${viewMode}`} id="main-content" onClick={event => {
+        if (!isSearch || event.defaultPrevented || !(event.target instanceof Element)
+          || event.target.closest('a, button, input, select, textarea, nav, dialog')) return;
+        event.currentTarget.querySelector<HTMLInputElement>('.inventory-page:not([aria-hidden="true"]) .search-form input')?.focus({ preventScroll: true });
+      }}>
         <PageTransition path={location.pathname} back={location.state?.direction === 'back'}
           viaPanelMenu={navigationType !== 'POP' && location.state?.navigation === 'panel'} swipeHandlers={swipeHandlers}>{active => isAdd
           ? <AddPage items={items} loading={loading} error={error} active={active} onRetry={() => void refresh()} onReadyChange={setAddReady}

@@ -1,5 +1,14 @@
 # Home browsing verification
 
+## Fixed search and shared control feedback — 27 October 2026
+
+- Search field/rule are now visible at the top from first entry, with a permanently visible magnifier, `...` placeholder and default `sök efter föremål.` hint. Blank clicks anywhere in the search panel (including its padding) focus the input; links, buttons, filters and result cards retain their own behavior.
+- Removed blue outlines from Add fields and confirmation buttons; fields retain a subtle orange focus glow and keyboard-focused confirmation buttons darken slightly.
+- A single app-level handler supplies the existing bounce to every enabled button/link, including bottom navigation, breadcrumbs, modal controls and both Add-tile layouts. Disabled controls are excluded. Control wrappers animate, preserving icon hover/selected lifts; navigation remains immediate. Keyboard activation receives feedback too.
+- Buttons/links suppress context menus, native link dragging, selection and WebKit touch callouts. Inputs retain their normal editing interactions. Physical iPhone long-press behavior remains a device check.
+- Browser checks: initial field top 32px/rule opacity 1/magnifier width 36px, blank/padding focus, live search and result navigation, filter pointer/keyboard bounce, Add-grid bounce and contextual placement, no link menu on right-clicking Add-list tile, normal popup cancellation, computed outline none for Add input/Avbryt, fit at 320 × 640 with no overflow or console errors.
+- All 32 existing tests, TypeScript, production build and whitespace checks pass. Database write/delete operations remain disabled.
+
 ## Delete confirmation preview — 27 October 2026
 
 - The editor's trash control opens a native modal dialog matching the reference: pale backdrop, red border/warning icon, red Radera and teal Avbryt. Radera is disabled and no deletion callback or data write exists.

@@ -1,18 +1,8 @@
-import type { MouseEvent } from 'react';
 import { Box, ChevronLeft, Copy, FolderPen, House, LayoutGrid, MapPin, Package, PackagePlus, Rows2, Search } from 'lucide-react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { bounce } from './motion';
 import { isAddPath } from '../domain/navigation';
 
 export type ViewMode = 'list' | 'grid';
-
-function toolbarFeedback(event: MouseEvent<HTMLElement>) {
-  if (!(event.target instanceof Element)) return;
-  const control = event.target.closest('button, a');
-  if (!control || control.matches(':disabled, [aria-disabled="true"]')) return;
-  const icon = control.querySelector('svg');
-  if (icon) bounce(icon);
-}
 
 export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, onCopy, editRoute }: {
   parentRoute: string; atHome: boolean; viewMode: ViewMode;
@@ -20,7 +10,7 @@ export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, on
   editRoute?: string;
 }) {
   return (
-    <nav className="context-toolbar" aria-label="Åtgärder för aktuell vy" onClickCapture={toolbarFeedback}>
+    <nav className="context-toolbar" aria-label="Åtgärder för aktuell vy">
       <Link to={atHome ? '/' : parentRoute} state={{ direction: 'back' }} aria-disabled={atHome} tabIndex={atHome ? -1 : 0} aria-label="Gå till överordnad förvaring" title="Gå upp en nivå" className={atHome ? 'is-disabled' : ''}><ChevronLeft /></Link>
       <button type="button" onClick={onCopy} aria-label="Kopiera sidans länk" title="Kopiera sidans länk"><Copy /></button>
       {editRoute ? <Link to={editRoute} aria-label="Redigera föremål" title="Redigera föremål"><FolderPen /></Link>
@@ -34,7 +24,7 @@ export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, on
 export function SearchToolbar({ viewMode, onViewChange }: { viewMode: ViewMode; onViewChange: (mode: ViewMode) => void }) {
   const [params, setParams] = useSearchParams();
   const selected = params.get('type');
-  return <nav className="context-toolbar search-toolbar" aria-label="Filtrera sökresultat och välj vy" onClickCapture={toolbarFeedback}>
+  return <nav className="context-toolbar search-toolbar" aria-label="Filtrera sökresultat och välj vy">
     <div className="search-type-filters" role="group" aria-label="Typfilter">
       {([{ type: 'LOCATION', label: 'Visa endast platser', Icon: MapPin },
         { type: 'STORAGE', label: 'Visa endast förvaringar', Icon: Package },
