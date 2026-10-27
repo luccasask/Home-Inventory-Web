@@ -7,6 +7,7 @@ import { InventoryCard } from './components/InventoryCard';
 import { InventoryIcon } from './components/InventoryIcon';
 import { BottomNavigation, ContextToolbar, type ViewMode } from './components/Navigation';
 import { FitText } from './components/FitText';
+import { PageTransition } from './components/PageTransition';
 
 export default function App() {
   const [items, setItems] = useState<readonly InventoryItem[]>([]);
@@ -91,18 +92,18 @@ export default function App() {
   return (
     <div className="app-shell">
       <main className={`inventory-panel inventory-panel--${viewMode}`} id="main-content">
-        <div key={location.pathname} className="inventory-page">
+        <PageTransition path={location.pathname} back={location.state?.direction === 'back'}>{active => <>
         <header className="inventory-header">
           <button className={`refresh-button ${loading ? 'is-loading' : ''}`} onClick={() => void refresh()} disabled={loading} aria-label="Uppdatera innehållet" title="Uppdatera"><RefreshCcw /></button>
-          <h1 ref={heading} tabIndex={-1}>{current ? <InventoryIcon name={current.icon} /> : <House aria-hidden="true" />}<FitText>{title}</FitText></h1>
+          <h1 ref={active ? heading : null} tabIndex={-1}>{current ? <InventoryIcon name={current.icon} /> : <House aria-hidden="true" />}<FitText>{title}</FitText></h1>
           {!missing && <p className="hierarchy-summary">{loading && items.length === 0 ? 'Hämtar ditt inventarium…' : error ? 'Anslutningen kunde inte slutföras' : summary}</p>}
           <div className="header-rule" />
         </header>
 
-        <div className={`inventory-content inventory-content--${viewMode} view-transition--${viewTransition}`} ref={list}
-          aria-busy={loading || viewTransition !== 'idle'} inert={viewTransition !== 'idle'}
+        <div className={`inventory-content inventory-content--${viewMode} view-transition--${viewTransition}`} ref={active ? list : null}
+          aria-busy={loading || viewTransition !== 'idle'} inert={!active || viewTransition !== 'idle'}
           onAnimationEnd={event => {
-            if (event.target !== event.currentTarget) return;
+            if (!active || event.target !== event.currentTarget) return;
             if (viewTransition === 'out') {
               setViewMode(requestedView);
               setViewTransition('hidden');
@@ -121,7 +122,7 @@ export default function App() {
             </>}
         </div>
 
-        </div>
+        </>}</PageTransition>
         <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={requestedView} onViewChange={changeView} onCopy={() => void copyLink()} />
       </main>
       <BottomNavigation />

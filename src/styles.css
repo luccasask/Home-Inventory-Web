@@ -22,6 +22,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .app-shell { height: 100dvh; min-height: 560px; display: flex; flex-direction: column; padding-top: max(env(safe-area-inset-top), 8px); padding-bottom: env(safe-area-inset-bottom); position: relative; }
 .inventory-panel { background: var(--cream); border-radius: 22px; display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 0 14px 13px; }
 .inventory-page { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.page-transition { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); flex: 1; min-height: 0; overflow: hidden; }
+.page-transition > .inventory-page { grid-area: 1 / 1; min-width: 0; background: var(--cream); }
+.page-transition--forward { --page-enter-x: 100%; --page-exit-x: -100%; }
+.page-transition--back { --page-enter-x: -100%; --page-exit-x: 100%; }
+.page-slide--enter { animation: page-slide-in 200ms cubic-bezier(.25, .8, .25, 1) both; }
+.page-slide--exit { animation: page-slide-out 200ms cubic-bezier(.25, .8, .25, 1) both; pointer-events: none; }
+@keyframes page-slide-in { from { transform: translateX(var(--page-enter-x)); } to { transform: translateX(0); } }
+@keyframes page-slide-out { from { transform: translateX(0); } to { transform: translateX(var(--page-exit-x)); } }
 .inventory-header { position: relative; padding: 31px 16px 23px; flex-shrink: 0; }
 .inventory-header h1 { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 0; min-height: 64px; font-size: clamp(34px, 11.6vw, 50px); font-weight: 900; letter-spacing: -.7px; line-height: 1.12; outline: none; padding: 5px 25px 0 0; }
 .inventory-header h1 > svg { width: 49px; height: 53px; flex-shrink: 0; }
@@ -41,6 +49,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 @keyframes inventory-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
   .view-transition--out, .view-transition--in { animation-duration: 1ms; }
+  .page-slide--enter, .page-slide--exit { animation-duration: 1ms; }
 }
 .inventory-list { display: flex; flex-direction: column; gap: 14px; }
 .inventory-card, .add-card { display: flex; align-items: center; min-height: 99px; width: 100%; border: 4px solid; border-radius: 25px; background: transparent; flex-shrink: 0; }
