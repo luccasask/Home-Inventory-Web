@@ -154,7 +154,7 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
   return <>
     {session && allowed && opened && <div className="authenticated-app" hidden={showLock} inert={showLock}>{children}</div>}
     {showLock && <div className="app-shell auth-shell" {...feedback}>
-      <main className="inventory-panel auth-panel">
+      <main className={`inventory-panel auth-panel${session && allowed ? ' auth-panel--pin' : ''}`}>
         <img className="auth-logo" src={`${import.meta.env.BASE_URL}smart-storage-lock.png?v=smart-storage-5`} alt="SmartStorage" width="159" height="160" />
         {checking ? <p role="status">Kontrollerar inloggningen…</p> : !session ? <>
           <h1 ref={lockHeading} tabIndex={-1}>Välkommen hem</h1><p>Logga in en gång på den här enheten.</p>
