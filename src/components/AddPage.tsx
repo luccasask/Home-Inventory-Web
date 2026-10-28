@@ -75,7 +75,7 @@ export function AddPage({ items, tags, loading, error, active, onRetry, onReadyC
   return <section className="add-page" aria-label={editing ? 'Redigera föremål' : 'Lägg till föremål'}>
     <header className="inventory-header add-header">
       <h1 ref={active ? heading : null} tabIndex={-1}><HeadingIcon aria-hidden="true" /><FitText>{editing ? 'Redigera föremål' : 'Lägg till föremål'}</FitText></h1>
-      <p className="hierarchy-summary">Namn | Typ | Plats | Beskrivning | Tagg</p>
+      <p className="hierarchy-summary">Namn | Typ | Plats | Tagg | Beskrivning</p>
       <div className="header-rule" />
     </header>
     {(editing && !item) || (loading && !items.length) ? <div className="empty-state" role={loading ? 'status' : 'alert'}>
@@ -121,12 +121,6 @@ export function AddPage({ items, tags, loading, error, active, onRetry, onReadyC
         {error && <p id={`${id}-place-error`} className="add-field-note" role="alert">Platserna kunde inte hämtas. <button type="button" onClick={onRetry}>Försök igen</button></p>}
       </div>
       <div className="add-field">
-        <label htmlFor={`${id}-description`}>Beskrivning:</label>
-        <textarea id={`${id}-description`} value={description} onChange={event => setDraft(current => ({ ...current, description: limitWords(event.target.value) }))}
-          placeholder="Beskriv föremålet…" rows={5} aria-describedby={`${id}-word-limit`} />
-        <p id={`${id}-word-limit`} className="add-field-note word-count">{wordCount(description)} / {MAX_WORDS} ord</p>
-      </div>
-      <div className="add-field">
         <label htmlFor={`${id}-tag`}>Tagg:</label>
         <div className="add-select">
           <InventoryIcon name={selectedTag?.icon ?? (type === 'LOCATION' ? 'map-pin' : type === 'STORAGE' ? 'package' : 'box')} />
@@ -139,6 +133,12 @@ export function AddPage({ items, tags, loading, error, active, onRetry, onReadyC
           <ChevronDown className="select-chevron" aria-hidden="true" />
         </div>
         <p id={`${id}-tag-note`} className="add-field-note">{tagValid ? 'Valfri. Taggen bestämmer föremålets ikon.' : 'Välj en tillgänglig tagg eller standardikonen.'}</p>
+      </div>
+      <div className="add-field">
+        <label htmlFor={`${id}-description`}>Beskrivning:</label>
+        <textarea id={`${id}-description`} value={description} onChange={event => setDraft(current => ({ ...current, description: limitWords(event.target.value) }))}
+          placeholder="Beskriv föremålet…" rows={5} aria-describedby={`${id}-word-limit`} />
+        <p id={`${id}-word-limit`} className="add-field-note word-count">{wordCount(description)} / {MAX_WORDS} ord</p>
       </div>
       {editing && <button className="delete-item-button" type="button" disabled={!active || !item || loading}
         onClick={() => setDeleteOpen(true)} aria-haspopup="dialog" title="Ta bort föremål">

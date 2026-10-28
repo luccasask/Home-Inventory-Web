@@ -1,4 +1,4 @@
-import { AArrowDown, CalendarDays, Tags, Box, ChevronLeft, Copy, FolderPen, House, LayoutGrid, MapPin, Package, PackagePlus, Menu, Search } from 'lucide-react';
+import { AArrowDown, CalendarDays, Tags, Box, ChevronLeft, Link2, FolderPen, House, LayoutGrid, MapPin, Package, PackagePlus, Menu, Search } from 'lucide-react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { isAddPath } from '../domain/navigation';
 
@@ -14,7 +14,7 @@ export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, so
   return (
     <nav className="context-toolbar" aria-label="Åtgärder för aktuell vy">
       <Link to={atHome ? '/' : parentRoute} state={{ direction: 'back' }} aria-disabled={atHome} tabIndex={atHome ? -1 : 0} aria-label="Gå upp en nivå" title="Gå upp en nivå" className={atHome ? 'is-disabled' : ''}><ChevronLeft /></Link>
-      <button type="button" onClick={onCopy} aria-label="Kopiera sidans länk" title="Kopiera sidans länk"><Copy /></button>
+      <button type="button" onClick={onCopy} aria-label="Kopiera sidans länk" title="Kopiera sidans länk"><Link2 /></button>
       {editRoute ? <Link to={editRoute} aria-label="Redigera föremål" title="Redigera föremål"><FolderPen /></Link>
         : <button type="button" disabled aria-label="Redigera föremål" title="Öppna ett föremål eller en plats för att redigera"><FolderPen /></button>}
       <ViewToggle viewMode={viewMode} onViewChange={onViewChange} />
