@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
-import { Delete, House, LockKeyhole, Mail } from 'lucide-react';
+import { Delete, LockKeyhole, Mail } from 'lucide-react';
 import { configurationError, inventoryId, supabase } from '../services/supabase';
 import { checkPin, createPin, pinKey, readPin } from '../services/deviceLock';
 import { useControlFeedback } from './useControlFeedback';
@@ -155,7 +155,7 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
     {session && allowed && opened && <div className="authenticated-app" hidden={showLock} inert={showLock}>{children}</div>}
     {showLock && <div className="app-shell auth-shell" {...feedback}>
       <main className="inventory-panel auth-panel">
-        <House className="auth-house" aria-hidden="true" />
+        <img className="auth-logo" src={`${import.meta.env.BASE_URL}smart-storage-original.png?v=smart-storage-3`} alt="SmartStorage" width="159" height="160" />
         {checking ? <p role="status">Kontrollerar inloggningen…</p> : !session ? <>
           <h1 ref={lockHeading} tabIndex={-1}>Välkommen hem</h1><p>Logga in en gång på den här enheten.</p>
           <form className="auth-email-form" onSubmit={async event => {
