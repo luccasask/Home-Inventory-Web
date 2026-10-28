@@ -2,10 +2,10 @@
   font-family: 'Nunito Sans', 'Segoe UI', sans-serif;
   font-weight: 400;
   color: #39425f;
-  background: #E97C5B;
+  background: #F46B3F;
   font-synthesis: none;
   --navy: #39425f;
-  --terra: #E97C5B;
+  --terra: #F46B3F;
   --cream: #fdfcf5;
   --teal: #5bb2a4;
   --amber: #f2b249;
@@ -194,7 +194,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .search-page { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .search-header { position: absolute; top: 0; left: 0; right: 0; padding: 24px 0 16px; }
 .search-form { display: flex; align-items: center; gap: 10px; height: 60px; padding: 6px 16px; border: 2px solid var(--terra); border-radius: 16px; }
-.search-form:focus-within { box-shadow: 0 0 0 2px rgb(233 124 91 / 12%); }
+.search-form:focus-within { box-shadow: 0 0 0 2px rgb(244 107 63 / 12%); }
 .search-form input { min-width: 0; flex: 1; width: 100%; padding: 0; border: 0; outline: none; background: transparent; color: var(--navy); font: inherit; font-size: 24px; font-weight: 400; line-height: 1.2; }
 .search-form input::placeholder { color: var(--terra-text); opacity: 1; font-weight: 400; }
 .search-form input::-webkit-search-cancel-button { -webkit-appearance: none; }
@@ -241,7 +241,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .add-field input, .add-field select { height: 58px; }
 .add-field :is(input, textarea)::placeholder { color: #858a92; opacity: 1; }
 .add-field :is(input, select, textarea):focus { outline: none; border-color: var(--terra); }
-.add-field :is(input, select, textarea):focus-visible { box-shadow: 0 0 0 2px rgb(233 124 91 / 14%); }
+.add-field :is(input, select, textarea):focus-visible { box-shadow: 0 0 0 2px rgb(244 107 63 / 14%); }
 .add-select { position: relative; }
 .add-select select { appearance: none; -webkit-appearance: none; padding-left: 46px; padding-right: 50px; text-overflow: ellipsis; }
 .add-select > svg { position: absolute; width: 24px; height: 26px; left: 16px; top: 16px; color: var(--navy); pointer-events: none; stroke-width: 1.75; }
@@ -298,7 +298,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .auth-email-form { width: 100%; max-width: 380px; display: grid; gap: 14px; text-align: left; margin: 16px 0; }
 .auth-email-form label { font-size: 18px; font-weight: 600; }
 .auth-email-form input { width: 100%; padding: 16px; border: 2px solid var(--field-border); border-radius: 16px; color: var(--navy); background: var(--cream); font: inherit; font-size: 18px; }
-.auth-email-form input:focus { outline: none; box-shadow: 0 0 0 3px #e97c5b22; }
+.auth-email-form input:focus { outline: none; box-shadow: 0 0 0 3px #f46b3f22; }
 .auth-code-form { margin-top: 0; }
 .auth-email-form .auth-code-input { letter-spacing: .25em; font-variant-numeric: tabular-nums; }
 .auth-primary { display: flex; align-items: center; justify-content: center; gap: 12px; background: var(--teal); color: var(--cream); font: inherit; font-size: 18px; font-weight: 700; padding: 16px; border: 0; border-radius: 20px; }
@@ -310,8 +310,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--navy); outline-
 .pin-dots .filled { background: var(--terra); }
 .pin-keyboard-input { -webkit-text-security: disc; }
 .pin-keypad { display: grid; grid-template-columns: repeat(3, 68px); gap: 12px 22px; }
-.pin-keypad button { height: 58px; display: flex; align-items: center; justify-content: center; border: 2px solid #e97c5b66; border-radius: 19px; color: var(--navy); background: transparent; font-size: 28px; font-weight: 600; }
-.pin-keypad button:hover { background: #e97c5b15; }
+.pin-keypad button { height: 58px; display: flex; align-items: center; justify-content: center; border: 2px solid #f46b3f66; border-radius: 19px; color: var(--navy); background: transparent; font-size: 28px; font-weight: 600; }
+.pin-keypad button:hover { background: #f46b3f15; }
 .pin-keypad button:disabled { opacity: .4; }
 .auth-panel .auth-error, .auth-error { color: #b43430; }
 @media (max-height: 720px) { .auth-panel { gap: 8px; padding: 16px; justify-content: flex-start; } .auth-house { width: 38px; height: 38px; } .pin-keypad { gap: 8px 22px; } .pin-keypad button { height: 48px; } }
