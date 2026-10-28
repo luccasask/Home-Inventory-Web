@@ -22,7 +22,7 @@ function distance(a: string, b: string): number {
 
 export function searchInventory(items: readonly InventoryItem[], query: string, type: ItemType | null = null): InventoryItem[] {
   const needle = normalize(query);
-  if (!needle) return [];
+  if (!needle) return items.filter(item => !type || item.type === type);
   const terms = words(needle);
   if (!terms.length) return [];
   return items.flatMap(item => {

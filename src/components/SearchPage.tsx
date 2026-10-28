@@ -2,12 +2,13 @@ import { useLayoutEffect, useMemo, useRef } from 'react';
 import { Search, X } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import type { InventoryItem, ItemType } from '../domain/inventory';
+import { sortInventory, type SortMode } from '../domain/sorting';
 import { searchInventory } from '../domain/search';
 import { InventoryCard } from './InventoryCard';
 import type { ViewMode } from './Navigation';
 
-export function SearchPage({ items, loading, error, viewMode, active, onRetry, search, transition, onTransitionEnd, scrollPositions }: {
-  items: readonly InventoryItem[]; loading: boolean; error: string; viewMode: ViewMode;
+export function SearchPage({ sortMode, items, loading, error, viewMode, active, onRetry, search, transition, onTransitionEnd, scrollPositions }: {
+  sortMode: SortMode; items: readonly InventoryItem[]; loading: boolean; error: string; viewMode: ViewMode;
   active: boolean; onRetry: () => void;
   search: string; transition: string; onTransitionEnd: () => void;
   scrollPositions: Map<string, number>;
@@ -23,12 +24,12 @@ export function SearchPage({ items, loading, error, viewMode, active, onRetry, s
   const resultArea = useRef<HTMLDivElement>(null);
   const restoringScroll = useRef(false);
   const pointerScroll = useRef<{ key: string; top: number } | null>(null);
-  const results = useMemo(() => searchInventory(items, query, type), [items, query, type]);
-  const scrollKey = JSON.stringify([query, type, viewMode]);
+  const results = useMemo(() => sortInventory(searchInventory(items, query, type), sortMode), [items, query, type, sortMode]);
+  const scrollKey = JSON.stringify([query, type, viewMode, sortMode]);
   useLayoutEffect(() => {
     // Do not overwrite a saved position while the old layout fades out or the
     // new layout is hidden. Restore once its result cards are in place.
-    if (!active || !submitted || loading || !['idle', 'in'].includes(transition)) return;
+    if (!active || loading || !['idle', 'in'].includes(transition)) return;
     const area = resultArea.current;
     if (!area) return;
     const top = scrollPositions.get(scrollKey) ?? 0;
@@ -72,7 +73,7 @@ export function SearchPage({ items, loading, error, viewMode, active, onRetry, s
         }}><X aria-hidden="true" /></button>}
       </form>
       <p className="search-summary" role={active ? 'status' : undefined}>
-        {submitted ? loading ? 'Hämtar ditt inventarium…' : error ? 'Sökningen kunde inte slutföras' : summary : 'sök efter föremål.'}
+        {loading ? 'Hämtar ditt inventarium…' : error ? 'Sökningen kunde inte slutföras' : submitted ? summary : `Visar ${results.length} resultat`}
       </p>
       <div className="header-rule" />
     </header>
@@ -91,15 +92,15 @@ export function SearchPage({ items, loading, error, viewMode, active, onRetry, s
         pointerScroll.current = null;
       }}
       onScroll={event => {
-        if (active && submitted && !loading && transition === 'idle' && !restoringScroll.current) scrollPositions.set(scrollKey, event.currentTarget.scrollTop);
+        if (active && !loading && transition === 'idle' && !restoringScroll.current) scrollPositions.set(scrollKey, event.currentTarget.scrollTop);
       }}
-      inert={!active || !submitted || transition !== 'idle'} hidden={!submitted}
+      inert={!active || transition !== 'idle'}
       onAnimationEnd={event => { if (active && event.target === event.currentTarget) onTransitionEnd(); }}>
       {error ? <div className="empty-state" role="alert"><p>{error}</p><button onClick={onRetry}>Försök igen</button></div>
         : loading && !items.length ? <p className="empty-state">Hämtar innehåll…</p>
         : <div className={`inventory-list inventory-list--${viewMode}`} aria-label="Sökresultat">
           {results.map(item => <InventoryCard key={item.id} item={item} items={items} searchReturn={`/search${search}`} showSearchPath={viewMode === 'list'} />)}
-          {!results.length && <p className="search-empty">Inga träffar. Prova ett annat sökord eller ändra typfiltret.</p>}
+          {!results.length && <p className="search-empty">{submitted ? 'Inga träffar. Prova ett annat sökord eller ändra typfiltret.' : 'Inga föremål att visa. Lägg till innehåll eller ändra typfiltret.'}</p>}
         </div>}
     </div>
   </section>;

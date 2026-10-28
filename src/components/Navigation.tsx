@@ -1,13 +1,15 @@
-import { Box, ChevronLeft, Copy, FolderPen, House, LayoutGrid, MapPin, Package, PackagePlus, Menu, Search } from 'lucide-react';
+import { AArrowDown, CalendarDays, Tags, Box, ChevronLeft, Copy, FolderPen, House, LayoutGrid, MapPin, Package, PackagePlus, Menu, Search } from 'lucide-react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { isAddPath } from '../domain/navigation';
 
+import { nextSortMode, sortLabels, type SortMode } from '../domain/sorting';
+
 export type ViewMode = 'list' | 'grid';
 
-export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, onCopy, editRoute }: {
+export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, sortMode, onSortChange, onCopy, editRoute }: {
   parentRoute: string; atHome: boolean; viewMode: ViewMode;
   onViewChange: (mode: ViewMode) => void; onCopy: () => void;
-  editRoute?: string;
+  editRoute?: string; sortMode: SortMode; onSortChange: (mode: SortMode) => void;
 }) {
   return (
     <nav className="context-toolbar" aria-label="Åtgärder för aktuell vy">
@@ -15,13 +17,13 @@ export function ContextToolbar({ parentRoute, atHome, viewMode, onViewChange, on
       <button type="button" onClick={onCopy} aria-label="Kopiera sidans länk" title="Kopiera sidans länk"><Copy /></button>
       {editRoute ? <Link to={editRoute} aria-label="Redigera föremål" title="Redigera föremål"><FolderPen /></Link>
         : <button type="button" disabled aria-label="Redigera föremål" title="Öppna ett föremål eller en plats för att redigera"><FolderPen /></button>}
-      <button type="button" onClick={() => onViewChange('grid')} aria-pressed={viewMode === 'grid'} aria-label="Visa som grid" title="Visa som grid"><LayoutGrid /></button>
-      <button type="button" onClick={() => onViewChange('list')} aria-pressed={viewMode === 'list'} aria-label="Visa som lista" title="Visa som lista"><Menu /></button>
+      <ViewToggle viewMode={viewMode} onViewChange={onViewChange} />
+      <SortToggle sortMode={sortMode} onSortChange={onSortChange} />
     </nav>
   );
 }
 
-export function SearchToolbar({ viewMode, onViewChange }: { viewMode: ViewMode; onViewChange: (mode: ViewMode) => void }) {
+export function SearchToolbar({ viewMode, onViewChange, sortMode, onSortChange }: { viewMode: ViewMode; onViewChange: (mode: ViewMode) => void; sortMode: SortMode; onSortChange: (mode: SortMode) => void }) {
   const [params, setParams] = useSearchParams();
   const selected = params.get('type');
   return <nav className="context-toolbar search-toolbar" aria-label="Filtrera sökresultat och välj vy">
@@ -36,9 +38,9 @@ export function SearchToolbar({ viewMode, onViewChange }: { viewMode: ViewMode; 
             setParams(next, { replace: true });
           }}><Icon aria-hidden="true" /></button>)}
     </div>
-    <div className="search-view-controls" role="group" aria-label="Visningsläge">
-      <button type="button" onClick={() => onViewChange('grid')} aria-pressed={viewMode === 'grid'} aria-label="Visa som grid" title="Visa som grid"><LayoutGrid /></button>
-      <button type="button" onClick={() => onViewChange('list')} aria-pressed={viewMode === 'list'} aria-label="Visa som lista" title="Visa som lista"><Menu /></button>
+    <div className="search-view-controls" role="group" aria-label="Visning och sortering">
+      <ViewToggle viewMode={viewMode} onViewChange={onViewChange} />
+      <SortToggle sortMode={sortMode} onSortChange={onSortChange} />
     </div>
   </nav>;
 }
@@ -54,4 +56,18 @@ export function BottomNavigation({ lastHomePath }: { lastHomePath: string }) {
       <span className="navigation-indicator" aria-hidden="true" />
     </nav>
   );
+}
+
+function ViewToggle({ viewMode, onViewChange }: { viewMode: ViewMode; onViewChange: (mode: ViewMode) => void }) {
+  const label = viewMode === 'grid' ? 'Visa som lista' : 'Visa som grid';
+  return <button type="button" onClick={() => onViewChange(viewMode === 'grid' ? 'list' : 'grid')} aria-label={label} title={label}>
+    {viewMode === 'grid' ? <LayoutGrid aria-hidden="true" /> : <Menu aria-hidden="true" />}
+  </button>;
+}
+
+function SortToggle({ sortMode, onSortChange }: { sortMode: SortMode; onSortChange: (mode: SortMode) => void }) {
+  const next = nextSortMode(sortMode);
+  const label = 'Sortering: ' + sortLabels[sortMode] + '. Byt till ' + sortLabels[next];
+  const Icon = sortMode === 'recent' ? CalendarDays : sortMode === 'tag' ? Tags : AArrowDown;
+  return <button type="button" onClick={() => onSortChange(next)} aria-label={label} title={label}><Icon aria-hidden="true" /></button>;
 }

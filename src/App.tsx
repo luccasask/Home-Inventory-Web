@@ -12,6 +12,7 @@ import { FitText } from './components/FitText';
 import { PageTransition } from './components/PageTransition';
 import { SearchPage } from './components/SearchPage';
 import { AddPage, AddSavePanel } from './components/AddPage';
+import { sortInventory, sortModes, type SortMode } from './domain/sorting';
 import { isAddPath } from './domain/navigation';
 import { swipeTarget } from './domain/swipe';
 import { useSwipeNavigation } from './components/useSwipeNavigation';
@@ -42,19 +43,25 @@ export default function App() {
     try { return localStorage.getItem('inventory-view') === 'grid' ? 'grid' : 'list'; }
     catch { return 'list'; }
   });
+  const [sortMode, setSortMode] = useState<SortMode>(() => {
+    try { const saved = localStorage.getItem('inventory-sort'); return sortModes.includes(saved as SortMode) ? saved as SortMode : 'recent'; }
+    catch { return 'recent'; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem('inventory-sort', sortMode); } catch { /* Sorting works without storage. */ }
+    list.current?.scrollTo(0, 0);
+  }, [sortMode]);
   const [requestedView, setRequestedView] = useState<ViewMode>(viewMode);
   const [viewTransition, setViewTransition] = useState<'idle' | 'out' | 'hidden' | 'in'>('idle');
   const changeView = (mode: ViewMode) => {
     setRequestedView(mode);
-    if (isSearch && !new URLSearchParams(location.search).get('q')?.trim()) setViewMode(mode);
   };
   useEffect(() => {
     if (viewTransition === 'idle' && requestedView !== viewMode) setViewTransition('out');
   }, [requestedView, viewMode, viewTransition]);
   useEffect(() => {
-    // Panels without visible results cannot finish a grid/list animation.
-    // Settle it when entering the add form or clearing the live query.
-    if (isAdd || (isSearch && !new URLSearchParams(location.search).get('q')?.trim())) {
+    // The add form has no results to finish a grid/list animation.
+    if (isAdd) {
       setViewMode(requestedView);
       setViewTransition('idle');
     }
@@ -155,7 +162,7 @@ export default function App() {
   });
   const isHome = location.pathname === '/';
   const missing = !isHome && !current;
-  const children = childrenOf(items, current?.id ?? null);
+  const children = sortInventory(childrenOf(items, current?.id ?? null), sortMode);
   const ancestors = current ? ancestorsOf(items, current) : [];
   const parent = ancestors.at(-1);
   const parentRoute = parent ? routeFor(parent) : '/';
@@ -197,7 +204,7 @@ export default function App() {
               }}
               editing={Boolean(editId)} item={editingItem} initialParent={initialParent} />
           : isSearch
-          ? <SearchPage items={items} loading={loading} error={error} viewMode={viewMode} active={active}
+          ? <SearchPage sortMode={sortMode} items={items} loading={loading} error={error} viewMode={viewMode} active={active}
               scrollPositions={searchScrollPositions.current}
               search={location.search} transition={viewTransition} onRetry={() => void refresh()}
               onTransitionEnd={() => {
@@ -236,8 +243,8 @@ export default function App() {
         </div>
 
         </>}</PageTransition>
-        {isAdd ? <AddSavePanel ready={addReady} /> : isSearch ? <SearchToolbar viewMode={requestedView} onViewChange={changeView} />
-          : <ContextToolbar atHome={isHome} parentRoute={parentRoute} viewMode={requestedView} onViewChange={changeView} onCopy={() => void copyLink()}
+        {isAdd ? <AddSavePanel ready={addReady} /> : isSearch ? <SearchToolbar sortMode={sortMode} onSortChange={setSortMode} viewMode={requestedView} onViewChange={changeView} />
+          : <ContextToolbar sortMode={sortMode} onSortChange={setSortMode} atHome={isHome} parentRoute={parentRoute} viewMode={requestedView} onViewChange={changeView} onCopy={() => void copyLink()}
               editRoute={current ? `/add/${current.publicId}` : undefined} />}
       </main>
       <BottomNavigation lastHomePath={lastHomePath} />

@@ -27,7 +27,8 @@ test('supports small spelling mistakes and swapped adjacent letters without fuzz
 test('keeps Swedish letters distinct and handles empty or punctuation-only input', () => {
   assert.deepEqual(searchInventory(items, 'vag'), []);
   assert.equal(searchInventory(items, 'VÅG')[0].name, 'Våg');
-  assert.deepEqual(searchInventory(items, '   '), []);
+  assert.deepEqual(searchInventory(items, '   '), items);
+  assert.deepEqual(searchInventory(items, '', 'STORAGE').map(i => i.id), ['6']);
   assert.deepEqual(searchInventory(items, '???'), []);
 });
 test('requires all query terms and uses stable sorting for equal matches', () => {

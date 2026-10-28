@@ -82,11 +82,11 @@ The app locks on page hiding/reopening and also offers a lock button. Incorrect 
 
 ## Search
 
-Open the search icon in the bottom navigation. The field and separator are visible at the top immediately; results update while typing. Results search all loaded items, independently of their parents; opening a result uses the item's existing stable URL.
+Open the search icon in the bottom navigation. The field and separator are visible at the top immediately; results update while typing. An empty query shows all items, respecting the selected type filter. Results search all loaded items, independently of their parents; opening a result uses the item's existing stable URL.
 
 Ranking prioritizes exact names, name prefixes, partial names, all query words in the name, descriptions, ancestor placement, and finally small spelling mistakes in names. Swedish letters remain distinct. Category names, legacy detail tags, synonyms and hypernyms are not included in search ranking in this version.
 
-The three type buttons select locations, storage, or objects. Select the active filter again to show all types. Type and view controls share one outlined toolbar, and selected icons are filled. List/grid selection is shared with browsing and saved locally. The query and optional type filter are kept in the hash URL (`#/search?q=kastrull&type=OBJECT`) using replacement while typing, so reload and browser Back restore the search without a history entry for every character.
+The three type buttons select locations, storage, or objects. Select the active filter again to show all types. Type and view controls share one outlined toolbar, and selected icons are filled. One button toggles list/grid. A second button cycles recent → category tag → Swedish A–Ö. Both settings are shared with Home and browsing and saved locally. Recent uses descending database bigint identity (insertion order); tag sorting groups by category name with untagged items last, then sorts names within each group. The active icon changes with each mode. Search matching remains unchanged; the chosen ordering applies to every match. The query and optional type filter are kept in the hash URL (`#/search?q=kastrull&type=OBJECT`) using replacement while typing, so reload and browser Back restore the search without a history entry for every character.
 
 Type filters use navy for locations, teal for storage and yellow for objects. Selected icons are entirely filled; unselected icons retain their Lucide outlines. View selection is distinguished by a subtle neutral tile and the corresponding icon.
 
