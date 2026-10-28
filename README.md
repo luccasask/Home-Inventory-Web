@@ -121,3 +121,7 @@ Leaving the editor discards its local changes. Returning starts from the origina
 Main-menu clicks follow the visual order Home → Search → Add. Selecting a panel to the left moves the outgoing page to the right and brings the selected page in from the left; selecting a panel to the right reverses this. Opening items (including search results), parent links, and browser Back/Forward retain their separate direction rules. Transitions remain 200ms without delaying navigation.
 
 Inventory actions, search controls, and Save share the Home toolbar's dimensions and placement: 83px high and full available width on mobile, capped at 520px on desktop.
+
+## Category icon refresh
+
+After the initial category setup, apply `supabase/refresh_category_tags.sql` to update the requested 16 tag/icon pairs. It preserves existing tag identities when renaming Elektronik to Elektronik 1, Kök & mat to Kök 2, and Förvaring to Förvaring 1, updates Verktyg and Hygien & hälsa, and adds 11 variants for 34 selectable categories in total. Other categories, item records and legacy detail links remain intact. The script can be retried safely. The original seed is historical setup and must not be rerun after this refresh. Deploy icon support before applying the refresh; the three newer icons are vendored from official Lucide SVG sources with their ISC notice in AdditionalTagIcons.tsx.

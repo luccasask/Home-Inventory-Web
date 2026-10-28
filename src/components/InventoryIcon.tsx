@@ -1,10 +1,14 @@
-import { Archive, Armchair, BedDouble, BookOpen, Box, BriefcaseBusiness, Car, CookingPot,
+import { Apple, Cookie, Cross, Layers, Monitor, Plug, Refrigerator, Snowflake, Archive, Armchair, BedDouble, BookOpen, Box, BriefcaseBusiness, Car, CookingPot,
   DoorOpen, Drill, Hammer, House, Lamp, MapPin, Package, Shirt, Sofa, Utensils, Wrench,
   Bath, Cpu, Dumbbell, Gamepad2, Gift, Music, PawPrint, PencilRuler, Plane, Sprout, type LucideIcon } from 'lucide-react';
+import { SoapDispenserDroplet, ToothbrushSparkles, ShelvingUnit } from './AdditionalTagIcons';
 import { BrushCleaning } from './BrushCleaning';
 
 // Bundle supported graphics; Supabase tags store icon names rather than assets.
 const icons: Record<string, LucideIcon> = {
+  plug: Plug, monitor: Monitor, 'soap-dispenser-droplet': SoapDispenserDroplet, cross: Cross, layers: Layers,
+  'toothbrush-sparkles': ToothbrushSparkles, apple: Apple, snowflake: Snowflake, cookie: Cookie,
+  refrigerator: Refrigerator, 'shelving-unit': ShelvingUnit,
   bath: Bath, cpu: Cpu, dumbbell: Dumbbell, 'gamepad-2': Gamepad2, gift: Gift, music: Music,
   'paw-print': PawPrint, 'pencil-ruler': PencilRuler, plane: Plane, sprout: Sprout, 'brush-cleaning': BrushCleaning,
   archive: Archive, armchair: Armchair, 'bed-double': BedDouble, 'book-open': BookOpen,
